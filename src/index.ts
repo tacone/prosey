@@ -227,6 +227,7 @@ try {
     } else {
       console.log(output);
     }
+    process.exit(0);
   } else if (listOnly) {
     const languages = await listLanguages(videoId);
     printLanguages(languages);
