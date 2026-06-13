@@ -51,5 +51,9 @@ export async function loadConfig(): Promise<ProseyConfig> {
   }
 
   const raw = await readFile(path, "utf8");
-  return load(raw) as ProseyConfig;
+  try {
+    return load(raw) as ProseyConfig;
+  } catch {
+    return {};
+  }
 }
