@@ -1,5 +1,15 @@
 # Changelog — Prosey
 
+## 2026-06-13 (5) — Add --details / --no-details flags
+
+Workstation: xoxo | Workspace: prosey
+
+- Added `--details` / `--no-details` flags (default: --details)
+- Details block shows title, channel, duration, views, description (truncated 500 chars)
+- Separated from transcript by 2 blank lines
+- --details + --json errors with a clear message
+- Rebuilt binary
+
 ## 2026-06-13 (4) — Add info command
 
 Workstation: xoxo | Workspace: prosey

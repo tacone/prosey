@@ -24,8 +24,10 @@ Options:
   -t, --timestamps       Include timestamps [MM:SS] in output.
   --list                 List available transcript languages and exit.
   -o, --output <path>    Write output to file instead of stdout.
-  --json                 Output as JSON.
+  --json                 Output as JSON (incompatible with --details).
   --text                 Output as plain text (default).
+  --details              Prepend video details to transcript (default).
+  --no-details           Suppress video details, transcript only.
   --no-decode-entities   Preserve HTML entities (decoded by default).
   --help                 Show this help message.
   --version              Show version.
@@ -35,8 +37,27 @@ Examples:
   ${NAME} https://www.youtube.com/watch?v=dQw4w9WgXcQ --lang es
   ${NAME} dQw4w9WgXcQ -t -o transcript.txt
   ${NAME} dQw4w9WgXcQ --list
-  ${NAME} dQw4w9WgXcQ --json
+  ${NAME} dQw4w9WgXcQ --json --no-details
+  ${NAME} dQw4w9WgXcQ --no-details
   ${NAME} info dQw4w9WgXcQ`;
+}
+
+function formatDetailsBlock(details: VideoDetails): string {
+  const lines: string[] = [
+    `Title:    ${decodeEntities(details.title)}`,
+    `Channel:  ${details.author}`,
+    `Duration: ${formatDuration(details.lengthSeconds)}`,
+    `Views:    ${details.viewCount.toLocaleString()}`,
+  ];
+
+  if (details.description) {
+    const desc = details.description.length > 500
+      ? details.description.slice(0, 500) + "…"
+      : details.description;
+    lines.push(`Description:\n  ${desc.replace(/\n/g, "\n  ")}`);
+  }
+
+  return lines.join("\n");
 }
 
 function printVideoInfo(details: VideoDetails): void {
@@ -109,6 +130,7 @@ let listOnly = false;
 let outputPath: string | undefined;
 let outputJson = false;
 let noDecode = false;
+let showDetails = true;
 
 for (let i = 0; i < args.length; i++) {
   const arg = args[i];
@@ -133,6 +155,10 @@ for (let i = 0; i < args.length; i++) {
     outputJson = true;
   } else if (arg === "--text") {
     outputJson = false;
+  } else if (arg === "--details") {
+    showDetails = true;
+  } else if (arg === "--no-details") {
+    showDetails = false;
   } else if (arg === "--no-decode-entities") {
     noDecode = true;
   } else if (arg.startsWith("-")) {
@@ -149,9 +175,14 @@ if (!videoId) {
   process.exit(1);
 }
 
+if (showDetails && outputJson) {
+  console.error("Error: --details is incompatible with --json. Use --no-details to suppress video details.");
+  process.exit(1);
+}
+
 try {
   if (mode === "info") {
-    const result = await fetchTranscript(videoId, { videoDetails: true, lang });
+    const result = await fetchTranscript(videoId, { videoDetails: true, lang } as any);
     if (outputJson) {
       console.log(JSON.stringify(result.videoDetails, null, 2));
     } else {
@@ -166,20 +197,39 @@ try {
     process.exit(0);
   }
 
-  const segments = lang ? await fetchTranscript(videoId, { lang }) : await fetchTranscript(videoId);
-
   const decode = !noDecode;
 
-  const output = outputJson
-    ? toJSON(segments, decode) + "\n"
-    : timestamps
-      ? formatWithTimestamps(segments, decode) + "\n"
-      : toText(segments, decode) + "\n";
+  if (showDetails) {
+    const config = lang ? { lang, videoDetails: true as const } : { videoDetails: true as const };
+    const result = (await fetchTranscript(videoId, config)) as {
+      videoDetails: VideoDetails;
+      segments: { text: string; offset: number; duration: number; lang: string }[];
+    };
+    const detailsBlock = formatDetailsBlock(result.videoDetails);
+    const transcript = timestamps
+      ? formatWithTimestamps(result.segments, decode)
+      : toText(result.segments, decode);
+    const output = detailsBlock + "\n\n\n" + transcript + "\n";
 
-  if (outputPath) {
-    await Bun.write(outputPath, output);
+    if (outputPath) {
+      await Bun.write(outputPath, output);
+    } else {
+      console.log(output);
+    }
   } else {
-    console.log(output);
+    const segments = lang ? await fetchTranscript(videoId, { lang }) : await fetchTranscript(videoId);
+
+    const output = outputJson
+      ? toJSON(segments, decode) + "\n"
+      : timestamps
+        ? formatWithTimestamps(segments, decode) + "\n"
+        : toText(segments, decode) + "\n";
+
+    if (outputPath) {
+      await Bun.write(outputPath, output);
+    } else {
+      console.log(output);
+    }
   }
 } catch (err: unknown) {
   const message = err instanceof Error ? err.message : String(err);
