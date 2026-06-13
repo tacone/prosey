@@ -66,6 +66,12 @@ describe("extractVideoId", () => {
   test("embed URL", () => {
     expect(extractVideoId("https://www.youtube.com/embed/dQw4w9WgXcQ")).toBe("dQw4w9WgXcQ");
   });
+
+  test("invalid URL without video ID passes through as-is", () => {
+    expect(extractVideoId("https://example.com/search?q=hello")).toBe(
+      "https://example.com/search?q=hello",
+    );
+  });
 });
 
 describe("readCache / writeCache", () => {
