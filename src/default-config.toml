@@ -5,8 +5,7 @@
 # Prompt sent to the command via stdin.
 # Customize this to change how transcripts are summarized.
 prompt = """
-Summarize the following transcript.
-Focus on the key points and main arguments.
+Write a comprehensive summary of the following transcription.
 """
 
 # Command to execute with the prompt piped via stdin.

@@ -5,7 +5,7 @@
   "module": "src/index.ts",
   "type": "module",
   "bin": {
-    "prosey": "bin/prosey.js"
+    "prosey": "bin/prosey"
   },
   "files": [
     "bin/",
@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "start": "bun run src/index.ts",
-    "build": "bun build src/index.ts --target node --outfile bin/prosey.js",
+    "build": "bun build src/index.ts --target node --outfile bin/prosey",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "prettier": "prettier --write .",

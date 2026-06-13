@@ -124,11 +124,11 @@ This project uses **[Bun](https://bun.sh)** for development.
 bun run typecheck   # TypeScript check
 bun run start       # Run the CLI from source
 bun run test        # Run unit tests
-bun run build       # Compile Node bundle to bin/prosey.js
+bun run build       # Compile Node bundle to bin/prosey
 ```
 
 Before publishing to npm, `bun run build` runs automatically via the `prepack`
-hook, producing a Node-compatible JS bundle at `bin/prosey.js`.
+hook, producing a Node-compatible JS bundle at `bin/prosey`.
 
 ## Configuration
 
