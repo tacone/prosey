@@ -19,11 +19,25 @@ const FALLBACK_CONFIG_TOML = `# Default prosey configuration
 # Prompt sent to the command via stdin.
 # Customize this to change how transcripts are summarized.
 prompt = """
-Summarize the following transcript.
-Focus on the key points and main arguments.
+Write a comprehensive summary of the following transcription.
 """
 
-# Command to execute with the prompt piped via stdin.
+# Command to execute with the prompt and transcript piped via stdin.
+# The transcript is appended to the prompt automatically.
+#
+# Available options:
+#
+#   opencode run                    — full access (default)
+#   opencode run --permissions read  — read-only (view files, no edits)
+#
+#   claude -p "" --print            — full access (--print for clean output)
+#   claude --permission-mode plan -p "" --print  — read-only (plan/read only)
+#
+#   copilot -sp ""                  — full access (-s = silent, -p = prompt)
+#   copilot -sp "" --deny-all-tools — read-only (no shell/write access)
+#
+#   codex --sandbox default -p ""   — full access
+#   codex --sandbox read-only -p "" — read-only
 command = "opencode run"
 `;
 

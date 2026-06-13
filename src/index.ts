@@ -140,12 +140,10 @@ if (args.includes("--reset-config")) {
 const config: ProseyConfig = await loadConfig().catch(() => ({}) as ProseyConfig);
 
 let mode = "transcript";
-if (args[0] === "info") {
-  mode = "info";
-  args.splice(0, 1);
-} else if (args[0] === "summarize") {
-  mode = "summarize";
-  args.splice(0, 1);
+const subcmdIndex = args.findIndex((a) => a === "info" || a === "summarize");
+if (subcmdIndex !== -1) {
+  mode = args[subcmdIndex]!;
+  args.splice(subcmdIndex, 1);
 }
 
 let videoId = "";

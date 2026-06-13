@@ -38,5 +38,14 @@ export async function summarize(options: SummarizeOptions): Promise<string> {
   const { prompt, command, transcript, cwd } = options;
   const fullPrompt = `${prompt}\n\n${transcript}`;
   const output = await executeCommand(command, fullPrompt, cwd);
-  return output.replace(fullPrompt, "").replace(/\n+$/, "");
+
+  const cleaned = output.startsWith(fullPrompt)
+    ? output.slice(fullPrompt.length).replace(/\n+$/, "")
+    : output.replace(/\n+$/, "");
+
+  if (!cleaned || cleaned === transcript) {
+    throw new Error("Summarization command returned no meaningful output");
+  }
+
+  return cleaned;
 }

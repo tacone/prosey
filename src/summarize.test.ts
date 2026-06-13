@@ -2,22 +2,24 @@ import { describe, expect, test } from "bun:test";
 import { summarize } from "./summarize";
 
 describe("summarize", () => {
-  test("strips input text from output", async () => {
-    const result = await summarize({
-      prompt: "Summarize this:",
-      command: "cat",
-      transcript: "Hello world. This is the transcript.",
-    });
-    expect(result).toBe("");
+  test("rejects when command only echoes input", async () => {
+    await expect(
+      summarize({
+        prompt: "Summarize this:",
+        command: "cat",
+        transcript: "Hello world. This is the transcript.",
+      }),
+    ).rejects.toThrow("Summarization command returned no meaningful output");
   });
 
-  test("strips input text from output with empty prompt", async () => {
-    const result = await summarize({
-      prompt: "",
-      command: "cat",
-      transcript: "Just the transcript.",
-    });
-    expect(result).toBe("");
+  test("rejects when command only echoes input with empty prompt", async () => {
+    await expect(
+      summarize({
+        prompt: "",
+        command: "cat",
+        transcript: "Just the transcript.",
+      }),
+    ).rejects.toThrow("Summarization command returned no meaningful output");
   });
 
   test("preserves response text beyond the input", async () => {

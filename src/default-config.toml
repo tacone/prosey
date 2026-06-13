@@ -2,11 +2,15 @@
 # Created automatically on first run. Edit as needed.
 
 [summarize]
+
 # Prompt sent to the command via stdin.
 # Customize this to change how transcripts are summarized.
+
 prompt = """
 Write a comprehensive summary of the following transcription.
 """
 
-# Command to execute with the prompt piped via stdin.
-command = "opencode run"
+# Command to execute with the prompt and transcript piped via stdin.
+# The transcript is appended to the prompt automatically.
+
+command = "OPENCODE_PERMISSION='{\"read\":\"allow\",\"write\":\"deny\",\"edit\":\"deny\",\"bash\":\"deny\",\"glob\":\"deny\",\"grep\":\"deny\",\"webfetch\":\"deny\",\"task\":\"deny\",\"todowrite\":\"deny\",\"websearch\":\"deny\",\"lsp\":\"deny\"}' opencode run --pure"
