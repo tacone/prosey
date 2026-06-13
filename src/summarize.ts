@@ -36,5 +36,6 @@ function executeCommand(command: string, input: string): Promise<string> {
 export async function summarize(options: SummarizeOptions): Promise<string> {
   const { prompt, command, transcript } = options;
   const fullPrompt = `${prompt}\n\n${transcript}`;
-  return executeCommand(command, fullPrompt);
+  const output = await executeCommand(command, fullPrompt);
+  return output.replace(fullPrompt, "").replace(/\n+$/, "");
 }

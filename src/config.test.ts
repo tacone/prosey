@@ -54,7 +54,7 @@ describe("loadConfig", () => {
 
     const content = await readFile(tmpConfig, "utf8");
     expect(content).toContain("[summarize]");
-    expect(content).toContain('command = "opencode"');
+    expect(content).toContain('command = "opencode run"');
   });
 
   test("reads existing config file", async () => {
@@ -63,7 +63,7 @@ describe("loadConfig", () => {
     await loadConfig();
     const config = await loadConfig();
     expect(config.summarize?.prompt).toBeString();
-    expect(config.summarize?.command).toBe("opencode");
+    expect(config.summarize?.command).toBe("opencode run");
   });
 
   test("handles invalid TOML gracefully", async () => {
@@ -93,6 +93,6 @@ describe("resetConfig", () => {
 
     const content = await readFile(tmpConfig, "utf8");
     expect(content).toContain("[summarize]");
-    expect(content).toContain('command = "opencode"');
+    expect(content).toContain('command = "opencode run"');
   });
 });

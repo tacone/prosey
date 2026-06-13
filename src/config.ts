@@ -24,7 +24,7 @@ Focus on the key points and main arguments.
 """
 
 # Command to execute with the prompt piped via stdin.
-command = "opencode"
+command = "opencode run"
 `;
 
 async function readDefaultConfig(): Promise<string> {
