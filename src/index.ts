@@ -4,10 +4,11 @@ import { writeFile } from "node:fs/promises";
 import { fetchTranscript, listLanguages } from "youtube-transcript-plus";
 import type { CaptionTrackInfo, VideoDetails, TranscriptSegment } from "youtube-transcript-plus";
 import { formatWithTimestamps, toText, toJSON, formatDuration, decodeEntities } from "./format";
-import { loadConfig, resetConfig } from "./config";
+import { loadConfig, resetConfig, configPath } from "./config";
 import type { ProseyConfig } from "./config";
 import { summarize } from "./summarize";
 import { cacheDir, readCache, writeCache, extractVideoId } from "./cache";
+import { enableDebug, debug } from "./debug";
 
 const NAME = "prosey";
 const VERSION = "0.1.0";
@@ -40,6 +41,7 @@ Options:
   --no-decode-entities   Preserve HTML entities (decoded by default).
   --reset-config         Reset config file to defaults and exit.
   --no-cache             Skip cache and overwrite cache files.
+  --debug                Print debug information to stderr.
   --help                 Show this help message.
   --version              Show version.
 
@@ -155,6 +157,7 @@ let outputJson = false;
 let noDecode = false;
 let showDetails = true;
 let noCache = false;
+let debugMode = false;
 
 for (let i = 0; i < args.length; i++) {
   const arg = args[i];
@@ -185,6 +188,8 @@ for (let i = 0; i < args.length; i++) {
     showDetails = false;
   } else if (arg === "--no-cache") {
     noCache = true;
+  } else if (arg === "--debug") {
+    debugMode = true;
   } else if (arg === "--no-decode-entities") {
     noDecode = true;
   } else if (arg.startsWith("-")) {
@@ -209,6 +214,12 @@ if (!extracted) {
 }
 
 videoId = extracted;
+
+if (debugMode) enableDebug();
+debug("Config file:", configPath());
+debug("Video ID:", videoId);
+debug("Mode:", mode);
+if (lang) debug("Language:", lang);
 
 try {
   if (mode === "info") {
@@ -236,27 +247,38 @@ try {
       const cachedSegments = await readCache(dir, "transcript.json");
       const cachedSummary = await readCache(dir, "summary.md");
       if (cachedSegments && cachedSummary) {
+        debug("Cache hit:", dir);
         segments = JSON.parse(cachedSegments);
         summary = cachedSummary;
+      } else {
+        debug("Cache miss:", dir);
       }
+    } else {
+      debug("Cache skipped (--no-cache)");
     }
 
     if (!segments) {
+      debug("Fetching transcript...");
       segments = lang ? await fetchTranscript(videoId, { lang }) : await fetchTranscript(videoId);
+      debug(`Transcript fetched: ${segments.length} segments`);
       await writeCache(dir, "transcript.json", JSON.stringify(segments));
+      debug("Cache written: transcript.json");
     }
 
     const prompt = config.summarize.prompt ?? "";
     const transcriptText = toText(segments, !noDecode);
 
     if (!summary) {
+      debug("Running command:", config.summarize.command);
       summary = await summarize({
         prompt,
         command: config.summarize.command,
         transcript: transcriptText,
         cwd: dir,
       });
+      debug("Command exit: 0");
       await writeCache(dir, "summary.md", summary);
+      debug("Cache written: summary.md");
     }
 
     if (outputPath) {
@@ -279,10 +301,18 @@ try {
 
   if (!noCache) {
     const cached = await readCache(dir, "transcript.json");
-    if (cached) segments = JSON.parse(cached);
+    if (cached) {
+      debug("Cache hit:", dir);
+      segments = JSON.parse(cached);
+    } else {
+      debug("Cache miss:", dir);
+    }
+  } else {
+    debug("Cache skipped (--no-cache)");
   }
 
   if (!segments) {
+    debug("Fetching transcript...");
     if (showDetails && !outputJson) {
       const opts = lang ? { lang, videoDetails: true as const } : { videoDetails: true as const };
       const result = (await fetchTranscript(videoId, opts)) as {
