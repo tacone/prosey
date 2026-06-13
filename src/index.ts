@@ -24,9 +24,9 @@ Options:
   -t, --timestamps       Include timestamps [MM:SS] in output.
   --list                 List available transcript languages and exit.
   -o, --output <path>    Write output to file instead of stdout.
-  --json                 Output as JSON (incompatible with --details).
+  --json                 Output as JSON (suppresses details).
   --text                 Output as plain text (default).
-  --details              Prepend video details to transcript (default).
+  --details              Prepend video details to transcript (default, text only).
   --no-details           Suppress video details, transcript only.
   --no-decode-entities   Preserve HTML entities (decoded by default).
   --help                 Show this help message.
@@ -37,7 +37,7 @@ Examples:
   ${NAME} https://www.youtube.com/watch?v=dQw4w9WgXcQ --lang es
   ${NAME} dQw4w9WgXcQ -t -o transcript.txt
   ${NAME} dQw4w9WgXcQ --list
-  ${NAME} dQw4w9WgXcQ --json --no-details
+  ${NAME} dQw4w9WgXcQ --json
   ${NAME} dQw4w9WgXcQ --no-details
   ${NAME} info dQw4w9WgXcQ`;
 }
@@ -51,9 +51,10 @@ function formatDetailsBlock(details: VideoDetails): string {
   ];
 
   if (details.description) {
-    const desc = details.description.length > 500
-      ? details.description.slice(0, 500) + "…"
-      : details.description;
+    const desc =
+      details.description.length > 500
+        ? details.description.slice(0, 500) + "…"
+        : details.description;
     lines.push(`Description:\n  ${desc.replace(/\n/g, "\n  ")}`);
   }
 
@@ -175,11 +176,6 @@ if (!videoId) {
   process.exit(1);
 }
 
-if (showDetails && outputJson) {
-  console.error("Error: --details is incompatible with --json. Use --no-details to suppress video details.");
-  process.exit(1);
-}
-
 try {
   if (mode === "info") {
     const result = await fetchTranscript(videoId, { videoDetails: true, lang } as any);
@@ -199,7 +195,7 @@ try {
 
   const decode = !noDecode;
 
-  if (showDetails) {
+  if (showDetails && !outputJson) {
     const config = lang ? { lang, videoDetails: true as const } : { videoDetails: true as const };
     const result = (await fetchTranscript(videoId, config)) as {
       videoDetails: VideoDetails;
@@ -217,7 +213,9 @@ try {
       console.log(output);
     }
   } else {
-    const segments = lang ? await fetchTranscript(videoId, { lang }) : await fetchTranscript(videoId);
+    const segments = lang
+      ? await fetchTranscript(videoId, { lang })
+      : await fetchTranscript(videoId);
 
     const output = outputJson
       ? toJSON(segments, decode) + "\n"

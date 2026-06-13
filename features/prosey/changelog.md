@@ -1,5 +1,12 @@
 # Changelog — Prosey
 
+## 2026-06-13 (6) — --json silently suppresses details
+
+Workstation: xoxo | Workspace: prosey
+
+- --json no longer errors with --details; silently outputs just the JSON array
+- Updated help text and examples
+
 ## 2026-06-13 (5) — Add --details / --no-details flags
 
 Workstation: xoxo | Workspace: prosey
