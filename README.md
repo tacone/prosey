@@ -116,15 +116,6 @@ When `--json` is used, the output is an array of objects:
 `timestamp` is always present in JSON mode. Video details are suppressed
 (silently) since JSON is structured data.
 
-## Binary
-
-Build a single-file binary with no external dependencies:
-
-```bash
-bun run build
-./dist/prosey 771PQEDeRmw
-```
-
 ## Development
 
 This project uses **[Bun](https://bun.sh)** for development.
@@ -133,12 +124,11 @@ This project uses **[Bun](https://bun.sh)** for development.
 bun run typecheck   # TypeScript check
 bun run start       # Run the CLI from source
 bun run test        # Run unit tests
-bun run build       # Compile standalone binary
+bun run build       # Compile Node bundle to bin/prosey.js
 ```
 
-Before publishing to npm, `bun run build:node` compiles the TypeScript source
-into a Node-compatible JS bundle at `bin/prosey.js`. This happens automatically
-via the `prepack` hook.
+Before publishing to npm, `bun run build` runs automatically via the `prepack`
+hook, producing a Node-compatible JS bundle at `bin/prosey.js`.
 
 ## Configuration
 

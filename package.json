@@ -16,12 +16,11 @@
   ],
   "scripts": {
     "start": "bun run src/index.ts",
-    "build": "bun build src/index.ts --compile --outfile dist/prosey",
-    "build:node": "bun build src/index.ts --target node --outfile bin/prosey.js",
+    "build": "bun build src/index.ts --target node --outfile bin/prosey.js",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "prettier": "prettier --write .",
-    "prepack": "bun run build:node",
+    "prepack": "bun run build",
     "prepare": "husky || true"
   },
   "lint-staged": {

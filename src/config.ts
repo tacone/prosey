@@ -12,13 +12,30 @@ export interface ProseyConfig {
   };
 }
 
+const FALLBACK_CONFIG_TOML = `# Default prosey configuration
+# Created automatically on first run. Edit as needed.
+
+[summarize]
+# Prompt sent to the command via stdin.
+# Customize this to change how transcripts are summarized.
+prompt = """
+Summarize the following transcript.
+Focus on the key points and main arguments.
+"""
+
+# Command to execute with the prompt piped via stdin.
+command = "opencode"
+`;
+
 async function readDefaultConfig(): Promise<string> {
-  const local = join(dirname(fileURLToPath(import.meta.url)), "default-config.toml");
-  if (existsSync(local)) return readFile(local, "utf8");
-  return readFile(
+  const paths = [
+    join(dirname(fileURLToPath(import.meta.url)), "default-config.toml"),
     join(dirname(fileURLToPath(import.meta.url)), "..", "src", "default-config.toml"),
-    "utf8",
-  );
+  ];
+  for (const p of paths) {
+    if (existsSync(p)) return readFile(p, "utf8");
+  }
+  return FALLBACK_CONFIG_TOML;
 }
 
 function configDir(): string {
