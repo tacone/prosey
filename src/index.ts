@@ -4,6 +4,7 @@ import { writeFile } from "node:fs/promises";
 import { fetchTranscript, listLanguages } from "youtube-transcript-plus";
 import type { CaptionTrackInfo, VideoDetails } from "youtube-transcript-plus";
 import { formatWithTimestamps, toText, toJSON, formatDuration, decodeEntities } from "./format";
+import { loadConfig } from "./config";
 
 const NAME = "prosey";
 const VERSION = "0.1.0";
@@ -120,6 +121,8 @@ if (args.includes("--version")) {
   console.log(VERSION);
   process.exit(0);
 }
+
+const config = await loadConfig().catch(() => ({}));
 
 let mode = "transcript";
 if (args[0] === "info") {

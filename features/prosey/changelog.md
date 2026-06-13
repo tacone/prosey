@@ -1,5 +1,15 @@
 # Changelog — Prosey
 
+## 2026-06-13 (7) — Add machine-wide config support
+
+Workstation: xoxo | Workspace: prosey
+
+- Added config module (src/config.ts) using js-toml
+- Config path: $XDG_CONFIG_HOME/prosey/config.toml, override with PROSEY_CONFIG_PATH
+- Default config auto-created on first run
+- [summarize] section with prompt (long string, piped via stdin) and command
+- Rebuilt binaries
+
 ## 2026-06-13 (6) — --json silently suppresses details
 
 Workstation: xoxo | Workspace: prosey

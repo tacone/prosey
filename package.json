@@ -59,6 +59,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "js-toml": "^1.1.2",
     "youtube-transcript-plus": "^2.0.0"
   }
 }
