@@ -1,5 +1,6 @@
-import { fetchTranscript, listLanguages, toPlainText } from "youtube-transcript-plus";
-import type { CaptionTrackInfo, TranscriptSegment } from "youtube-transcript-plus";
+import { fetchTranscript, listLanguages } from "youtube-transcript-plus";
+import type { CaptionTrackInfo } from "youtube-transcript-plus";
+import { formatWithTimestamps, toText, toJSON } from "./format";
 
 const NAME = "prosey";
 const VERSION = "0.1.0";
@@ -31,42 +32,6 @@ Examples:
   ${NAME} dQw4w9WgXcQ --timestamps -o transcript.txt
   ${NAME} dQw4w9WgXcQ --list
   ${NAME} dQw4w9WgXcQ --json`;
-}
-
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-}
-
-function decodeEntities(text: string): string {
-  return text.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)));
-}
-
-function formatWithTimestamps(segments: TranscriptSegment[], decode: boolean): string {
-  return segments
-    .map((s) => {
-      const text = decode ? decodeEntities(s.text) : s.text;
-      return `[${formatTime(s.offset)}] ${text}`;
-    })
-    .join("\n");
-}
-
-function toText(segments: TranscriptSegment[], decode: boolean): string {
-  return segments
-    .map((s) => (decode ? decodeEntities(s.text) : s.text))
-    .join(" ")
-    .replace(/ +/g, " ");
-}
-
-function toJSON(segments: TranscriptSegment[], decode: boolean): string {
-  const data = segments.map((s) => ({
-    text: decode ? decodeEntities(s.text) : s.text,
-    offset: s.offset,
-    duration: s.duration,
-    timestamp: formatTime(s.offset),
-  }));
-  return JSON.stringify(data, null, 2);
 }
 
 function printLanguages(languages: CaptionTrackInfo[]): void {

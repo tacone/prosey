@@ -1,5 +1,14 @@
 # Changelog — Prosey
 
+## 2026-06-13 (3) — Add unit tests
+
+Workstation: xoxo | Workspace: prosey
+
+- Extracted formatting functions into `src/format.ts`
+- Added 18 unit tests covering formatTime, decodeEntities,
+  formatWithTimestamps, toText, toJSON
+- Added `bun test` script
+
 ## 2026-06-13 (2) — Add -t, --json, --text, --no-decode-entities
 
 Workstation: xoxo | Workspace: prosey

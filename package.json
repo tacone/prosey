@@ -6,6 +6,7 @@
   "scripts": {
     "start": "bun run src/index.ts",
     "build": "bun build src/index.ts --compile --outfile dist/prosey",
+    "test": "bun test",
     "typecheck": "tsc --noEmit",
     "prettier": "prettier --write .",
     "prepare": "husky"
