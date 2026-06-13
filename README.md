@@ -50,17 +50,17 @@ prosey dQw4w9WgXcQ --list
 
 ## Options
 
-| Flag | Description |
-|---|---|
-| `--lang <code>` | Language code (e.g. `en`, `fr`). Auto-detected if omitted. |
-| `-t`, `--timestamps` | Prepend `[MM:SS]` to each line in text output. |
-| `--list` | List available transcript languages for the video, then exit. |
-| `-o`, `--output <path>` | Write output to file instead of stdout. |
-| `--json` | Output transcript as a JSON array. Each item includes `text`, `offset` (seconds), `duration`, and `timestamp`. |
-| `--text` | Output as plain text (default). |
-| `--no-decode-entities` | Preserve raw HTML entities (e.g. `&#39;`). Decoded by default in text mode. |
-| `--help` | Show help message and exit. |
-| `--version` | Show version number and exit. |
+| Flag                    | Description                                                                                                    |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `--lang <code>`         | Language code (e.g. `en`, `fr`). Auto-detected if omitted.                                                     |
+| `-t`, `--timestamps`    | Prepend `[MM:SS]` to each line in text output.                                                                 |
+| `--list`                | List available transcript languages for the video, then exit.                                                  |
+| `-o`, `--output <path>` | Write output to file instead of stdout.                                                                        |
+| `--json`                | Output transcript as a JSON array. Each item includes `text`, `offset` (seconds), `duration`, and `timestamp`. |
+| `--text`                | Output as plain text (default).                                                                                |
+| `--no-decode-entities`  | Preserve raw HTML entities (e.g. `&#39;`). Decoded by default in text mode.                                    |
+| `--help`                | Show help message and exit.                                                                                    |
+| `--version`             | Show version number and exit.                                                                                  |
 
 ## JSON format
 

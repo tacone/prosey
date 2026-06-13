@@ -20,14 +20,14 @@ positional argument.
 
 ## 4. Flags
 
-| Flag | Description |
-|---|---|
-| `--lang <code>` | Language code (e.g. `en`, `fr`). Auto-detect if omitted. |
-| `--timestamps` | Include timestamps in output. |
-| `--list` | List available transcript languages for the video, then exit. |
-| `-o <path>` | Write output to file instead of stdout. |
-| `--help` | Show usage. |
-| `--version` | Show version. |
+| Flag            | Description                                                   |
+| --------------- | ------------------------------------------------------------- |
+| `--lang <code>` | Language code (e.g. `en`, `fr`). Auto-detect if omitted.      |
+| `--timestamps`  | Include timestamps in output.                                 |
+| `--list`        | List available transcript languages for the video, then exit. |
+| `-o <path>`     | Write output to file instead of stdout.                       |
+| `--help`        | Show usage.                                                   |
+| `--version`     | Show version.                                                 |
 
 ## 5. Tech Stack
 

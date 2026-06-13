@@ -143,9 +143,7 @@ try {
     process.exit(0);
   }
 
-  const segments = lang
-    ? await fetchTranscript(videoId, { lang })
-    : await fetchTranscript(videoId);
+  const segments = lang ? await fetchTranscript(videoId, { lang }) : await fetchTranscript(videoId);
 
   const decode = !noDecode;
 
