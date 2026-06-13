@@ -153,6 +153,11 @@ Transcripts and summaries are cached to `/tmp/prosey/`. Repeated invocations
 for the same video and options are instant and work offline. Use `--no-cache`
 to skip cache reads and force a fresh fetch.
 
+When running `prosey summarize`, the command runs inside the cache directory
+for that video. This prevents the AI agent from picking up project-specific
+files like `AGENTS.md` or `CLAUDE.md` from the current folder, and limits its
+ability to modify files outside that directory.
+
 ## Exit codes
 
 | Code | Meaning                 |
