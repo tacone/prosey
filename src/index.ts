@@ -1,6 +1,6 @@
 import { fetchTranscript, listLanguages } from "youtube-transcript-plus";
-import type { CaptionTrackInfo } from "youtube-transcript-plus";
-import { formatWithTimestamps, toText, toJSON } from "./format";
+import type { CaptionTrackInfo, VideoDetails } from "youtube-transcript-plus";
+import { formatWithTimestamps, toText, toJSON, formatDuration, decodeEntities } from "./format";
 
 const NAME = "prosey";
 const VERSION = "0.1.0";
@@ -9,8 +9,12 @@ function help(): string {
   return `${NAME} v${VERSION}
 
 Usage: ${NAME} [options] <video-url-or-id>
+       ${NAME} info [options] <video-url-or-id>
 
-Download a YouTube video transcript.
+Download a YouTube video transcript or show video details.
+
+Commands:
+  info                  Show video metadata (title, channel, duration, etc.)
 
 Arguments:
   video-url-or-id        YouTube URL (full or short) or bare video ID
@@ -20,7 +24,7 @@ Options:
   -t, --timestamps       Include timestamps [MM:SS] in output.
   --list                 List available transcript languages and exit.
   -o, --output <path>    Write output to file instead of stdout.
-  --json                 Output transcript as JSON array.
+  --json                 Output as JSON.
   --text                 Output as plain text (default).
   --no-decode-entities   Preserve HTML entities (decoded by default).
   --help                 Show this help message.
@@ -29,9 +33,47 @@ Options:
 Examples:
   ${NAME} dQw4w9WgXcQ
   ${NAME} https://www.youtube.com/watch?v=dQw4w9WgXcQ --lang es
-  ${NAME} dQw4w9WgXcQ --timestamps -o transcript.txt
+  ${NAME} dQw4w9WgXcQ -t -o transcript.txt
   ${NAME} dQw4w9WgXcQ --list
-  ${NAME} dQw4w9WgXcQ --json`;
+  ${NAME} dQw4w9WgXcQ --json
+  ${NAME} info dQw4w9WgXcQ`;
+}
+
+function printVideoInfo(details: VideoDetails): void {
+  const w = Math.max(
+    "Title:".length,
+    "Channel:".length,
+    "Duration:".length,
+    "Views:".length,
+    "Video ID:".length,
+    "Channel ID:".length,
+    "Keywords:".length,
+    "Description:".length,
+  );
+  const pad = (s: string) => s.padEnd(w);
+
+  const lines: string[] = [
+    `${pad("Title:")}      ${decodeEntities(details.title)}`,
+    `${pad("Channel:")}    ${details.author}`,
+    `${pad("Duration:")}   ${formatDuration(details.lengthSeconds)}`,
+    `${pad("Views:")}      ${details.viewCount.toLocaleString()}`,
+    `${pad("Video ID:")}   ${details.videoId}`,
+    `${pad("Channel ID:")} ${details.channelId}`,
+  ];
+
+  if (details.keywords.length > 0) {
+    lines.push(`${pad("Keywords:")}   ${details.keywords.join(", ")}`);
+  }
+
+  if (details.description) {
+    lines.push(`${pad("Description:")}`);
+    const descLines = details.description.split("\n").filter(Boolean);
+    for (const line of descLines) {
+      lines.push(`  ${line}`);
+    }
+  }
+
+  console.log(lines.join("\n"));
 }
 
 function printLanguages(languages: CaptionTrackInfo[]): void {
@@ -52,6 +94,12 @@ if (args.length === 0 || args.includes("--help")) {
 if (args.includes("--version")) {
   console.log(VERSION);
   process.exit(0);
+}
+
+let mode = "transcript";
+if (args[0] === "info") {
+  mode = "info";
+  args.splice(0, 1);
 }
 
 let videoId = "";
@@ -102,6 +150,16 @@ if (!videoId) {
 }
 
 try {
+  if (mode === "info") {
+    const result = await fetchTranscript(videoId, { videoDetails: true, lang });
+    if (outputJson) {
+      console.log(JSON.stringify(result.videoDetails, null, 2));
+    } else {
+      printVideoInfo(result.videoDetails);
+    }
+    process.exit(0);
+  }
+
   if (listOnly) {
     const languages = await listLanguages(videoId);
     printLanguages(languages);

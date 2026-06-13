@@ -1,5 +1,13 @@
 # Changelog — Prosey
 
+## 2026-06-13 (4) — Add info command
+
+Workstation: xoxo | Workspace: prosey
+
+- Added `prosey info <url|id>` subcommand for video metadata
+- Added `formatDuration` helper for human-readable duration
+- Rebuilt binary
+
 ## 2026-06-13 (3) — Add unit tests
 
 Workstation: xoxo | Workspace: prosey
