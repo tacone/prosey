@@ -1,0 +1,13 @@
+# Default prosey configuration
+# Created automatically on first run. Edit as needed.
+
+[summarize]
+# Prompt sent to the command via stdin.
+# Customize this to change how transcripts are summarized.
+prompt = """
+Summarize the following transcript.
+Focus on the key points and main arguments.
+"""
+
+# Command to execute with the prompt piped via stdin.
+command = "ai summarize"

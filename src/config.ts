@@ -1,7 +1,8 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { load } from "js-toml";
 
 export interface ProseyConfig {
@@ -11,20 +12,14 @@ export interface ProseyConfig {
   };
 }
 
-const DEFAULT_CONFIG_TOML = `# Default prosey configuration
-# Created automatically on first run. Edit as needed.
-
-[summarize]
-# Prompt sent to the command via stdin.
-# Customize this to change how transcripts are summarized.
-prompt = """
-Summarize the following transcript.
-Focus on the key points and main arguments.
-"""
-
-# Command to execute with the prompt piped via stdin.
-command = "ai summarize"
-`;
+async function readDefaultConfig(): Promise<string> {
+  const local = join(dirname(fileURLToPath(import.meta.url)), "default-config.toml");
+  if (existsSync(local)) return readFile(local, "utf8");
+  return readFile(
+    join(dirname(fileURLToPath(import.meta.url)), "..", "src", "default-config.toml"),
+    "utf8",
+  );
+}
 
 function configDir(): string {
   const env = process.env.XDG_CONFIG_HOME;
@@ -46,7 +41,7 @@ export async function loadConfig(): Promise<ProseyConfig> {
   if (!existsSync(path)) {
     const dir = configDir();
     await ensureDir(dir);
-    await writeFile(path, DEFAULT_CONFIG_TOML, "utf8");
+    await writeFile(path, await readDefaultConfig(), "utf8");
     return {};
   }
 
