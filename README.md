@@ -147,6 +147,12 @@ The `[summarize]` section configures the `summarize` command:
 | `prompt`  | Instruction prepended to the transcript          |
 | `command` | Shell command that receives the prompt via stdin |
 
+## Cache
+
+Transcripts and summaries are cached to `/tmp/prosey/`. Repeated invocations
+for the same video and options are instant and work offline. Use `--no-cache`
+to skip cache reads and force a fresh fetch.
+
 ## How it works
 
 prosey uses YouTube's Innertube API via the
