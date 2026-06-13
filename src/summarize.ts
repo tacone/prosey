@@ -4,11 +4,12 @@ export interface SummarizeOptions {
   prompt: string;
   command: string;
   transcript: string;
+  cwd?: string;
 }
 
-function executeCommand(command: string, input: string): Promise<string> {
+function executeCommand(command: string, input: string, cwd?: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    const proc = spawn(command, [], { shell: true, stdio: "pipe" });
+    const proc = spawn(command, [], { shell: true, stdio: "pipe", cwd });
 
     let stdout = "";
     let stderr = "";
@@ -34,8 +35,8 @@ function executeCommand(command: string, input: string): Promise<string> {
 }
 
 export async function summarize(options: SummarizeOptions): Promise<string> {
-  const { prompt, command, transcript } = options;
+  const { prompt, command, transcript, cwd } = options;
   const fullPrompt = `${prompt}\n\n${transcript}`;
-  const output = await executeCommand(command, fullPrompt);
+  const output = await executeCommand(command, fullPrompt, cwd);
   return output.replace(fullPrompt, "").replace(/\n+$/, "");
 }

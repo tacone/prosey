@@ -31,8 +31,8 @@ The cache key is `<video-id>_<hash>`, where:
 
 ```
 /tmp/prosey/<cache-key>/
-├── transcript.txt      # Plain text transcript (decoded, no timestamps)
-└── summary.md          # Output of the last summarize command run
+├── transcript.json      # JSON array of segments (raw fetch data)
+└── summary.md           # Output of the last summarize command run
 ```
 
 Only `transcript.txt` is written in transcript mode. Both files are written
@@ -44,9 +44,11 @@ fetches fresh data.
 ## 5. Cache lifecycle
 
 - **Write**: after a successful fetch or summarization, the result is written
-  to the corresponding cache file(s).
-- **Read**: before fetching the transcript, check for `transcript.txt`. Before
-  running the summarize command, check for both `transcript.txt` and
+  to the corresponding cache file(s). The transcript is stored as a JSON array
+  of segments so any output format (plain, timestamps, JSON) can be
+  reconstructed from cache.
+- **Read**: before fetching the transcript, check for `transcript.json`. Before
+  running the summarize command, check for both `transcript.json` and
   `summary.md`. If all required files exist and are non-empty, use them
   instead of making network calls or re-running the command.
 - **Invalidation**: `--no-cache` flag skips all cache reads and overwrites

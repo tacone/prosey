@@ -2,11 +2,12 @@
 
 import { writeFile } from "node:fs/promises";
 import { fetchTranscript, listLanguages } from "youtube-transcript-plus";
-import type { CaptionTrackInfo, VideoDetails } from "youtube-transcript-plus";
+import type { CaptionTrackInfo, VideoDetails, TranscriptSegment } from "youtube-transcript-plus";
 import { formatWithTimestamps, toText, toJSON, formatDuration, decodeEntities } from "./format";
 import { loadConfig, resetConfig } from "./config";
 import type { ProseyConfig } from "./config";
 import { summarize } from "./summarize";
+import { cacheDir, readCache, writeCache } from "./cache";
 
 const NAME = "prosey";
 const VERSION = "0.1.0";
@@ -38,6 +39,7 @@ Options:
   --no-details           Suppress video details, transcript only.
   --no-decode-entities   Preserve HTML entities (decoded by default).
   --reset-config         Reset config file to defaults and exit.
+  --no-cache             Skip cache and overwrite cache files.
   --help                 Show this help message.
   --version              Show version.
 
@@ -152,6 +154,7 @@ let outputPath: string | undefined;
 let outputJson = false;
 let noDecode = false;
 let showDetails = true;
+let noCache = false;
 
 for (let i = 0; i < args.length; i++) {
   const arg = args[i];
@@ -180,6 +183,8 @@ for (let i = 0; i < args.length; i++) {
     showDetails = true;
   } else if (arg === "--no-details") {
     showDetails = false;
+  } else if (arg === "--no-cache") {
+    noCache = true;
   } else if (arg === "--no-decode-entities") {
     noDecode = true;
   } else if (arg.startsWith("-")) {
@@ -213,19 +218,42 @@ try {
       process.exit(1);
     }
 
-    const segments = lang
-      ? await fetchTranscript(videoId, { lang })
-      : await fetchTranscript(videoId);
+    const cacheOpts = { lang, mode: "summarize", noDecode };
+    const dir = cacheDir(videoId, cacheOpts);
+    let segments: TranscriptSegment[] | null = null;
+    let summary: string | null = null;
+
+    if (!noCache) {
+      const cachedSegments = await readCache(dir, "transcript.json");
+      const cachedSummary = await readCache(dir, "summary.md");
+      if (cachedSegments && cachedSummary) {
+        segments = JSON.parse(cachedSegments);
+        summary = cachedSummary;
+      }
+    }
+
+    if (!segments) {
+      segments = lang ? await fetchTranscript(videoId, { lang }) : await fetchTranscript(videoId);
+      await writeCache(dir, "transcript.json", JSON.stringify(segments));
+    }
 
     const prompt = config.summarize.prompt ?? "";
-    const transcript = toText(segments, !noDecode);
+    const transcriptText = toText(segments, !noDecode);
 
-    const output = await summarize({ prompt, command: config.summarize.command, transcript });
+    if (!summary) {
+      summary = await summarize({
+        prompt,
+        command: config.summarize.command,
+        transcript: transcriptText,
+        cwd: dir,
+      });
+      await writeCache(dir, "summary.md", summary);
+    }
 
     if (outputPath) {
-      await writeFile(outputPath, output, "utf8");
+      await writeFile(outputPath, summary, "utf8");
     } else {
-      console.log(output);
+      console.log(summary);
     }
     process.exit(0);
   } else if (listOnly) {
@@ -235,18 +263,46 @@ try {
   }
 
   const decode = !noDecode;
+  const cacheOpts = { lang, timestamps, json: outputJson, noDecode };
+  const dir = cacheDir(videoId, cacheOpts);
+  let segments: TranscriptSegment[] | null = null;
+  let videoDetailsCache: VideoDetails | null = null;
+
+  if (!noCache) {
+    const cached = await readCache(dir, "transcript.json");
+    if (cached) segments = JSON.parse(cached);
+  }
+
+  if (!segments) {
+    if (showDetails && !outputJson) {
+      const opts = lang ? { lang, videoDetails: true as const } : { videoDetails: true as const };
+      const result = (await fetchTranscript(videoId, opts)) as {
+        videoDetails: VideoDetails;
+        segments: TranscriptSegment[];
+      };
+      segments = result.segments;
+      videoDetailsCache = result.videoDetails;
+    } else {
+      segments = lang ? await fetchTranscript(videoId, { lang }) : await fetchTranscript(videoId);
+    }
+    await writeCache(dir, "transcript.json", JSON.stringify(segments));
+  }
 
   if (showDetails && !outputJson) {
-    const config = lang ? { lang, videoDetails: true as const } : { videoDetails: true as const };
-    const result = (await fetchTranscript(videoId, config)) as {
-      videoDetails: VideoDetails;
-      segments: { text: string; offset: number; duration: number; lang: string }[];
-    };
-    const detailsBlock = formatDetailsBlock(result.videoDetails);
-    const transcript = timestamps
-      ? formatWithTimestamps(result.segments, decode)
-      : toText(result.segments, decode);
-    const output = detailsBlock + "\n\n\n" + transcript + "\n";
+    if (!videoDetailsCache) {
+      const opts = lang ? { lang, videoDetails: true as const } : { videoDetails: true as const };
+      const result = (await fetchTranscript(videoId, opts)) as {
+        videoDetails: VideoDetails;
+        segments: TranscriptSegment[];
+      };
+      videoDetailsCache = result.videoDetails;
+    }
+
+    const detailsBlock = formatDetailsBlock(videoDetailsCache);
+    const transcriptText = timestamps
+      ? formatWithTimestamps(segments, decode)
+      : toText(segments, decode);
+    const output = detailsBlock + "\n\n\n" + transcriptText + "\n";
 
     if (outputPath) {
       await writeFile(outputPath, output, "utf8");
@@ -254,10 +310,6 @@ try {
       console.log(output);
     }
   } else {
-    const segments = lang
-      ? await fetchTranscript(videoId, { lang })
-      : await fetchTranscript(videoId);
-
     const output = outputJson
       ? toJSON(segments, decode) + "\n"
       : timestamps
