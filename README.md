@@ -1,35 +1,58 @@
-# prosey
+# Prosey
 
-**prosey** downloads YouTube video transcripts so you can read, skim, search,
-copy, and manipulate the text — no watching required.
+**Prosey** downloads YouTube transcripts to be printed or saved to a file.
+
+You can read, skim, search, copy, and manipulate the text using the tools you love the most.
 
 ```bash
-prosey https://www.youtube.com/watch?v=dQw4w9WgXcQ
+npx prosey https://www.youtube.com/watch?v=dQw4w9WgXcQ
 ```
 
 ## Install
 
+### Quick — no install (npx)
+
 ```bash
-git clone <repo>
-cd prosey
-bun install
+npx prosey dQw4w9WgXcQ
 ```
 
-Or grab a prebuilt binary from the `dist/` directory.
+### Global install (npm)
+
+```bash
+npm install -g prosey
+prosey dQw4w9WgXcQ
+```
+
+### From source (development)
+
+Uses **[Bun](https://bun.sh)** for development — scripts, package management,
+and running the TypeScript source directly.
+
+```bash
+git clone https://github.com/tacone/prosey.git
+cd prosey
+bun install
+bun run start -- dQw4w9WgXcQ
+```
+
+### Prebuilt binary
+
+Grab a compiled binary from the `dist/` directory (requires no runtime).
 
 ## Usage
 
 ```
 prosey [options] <video-url-or-id>
+prosey info [options] <video-url-or-id>
 ```
 
 Pass a full YouTube URL or a bare video ID. The transcript is printed to
-stdout by default.
+stdout by default, with video details prepended.
 
 ### Examples
 
 ```bash
-# Basic — plain text to stdout
+# Basic — plain text with details
 prosey dQw4w9WgXcQ
 
 # Specify language
@@ -44,23 +67,31 @@ prosey dQw4w9WgXcQ -o transcript.txt
 # JSON output (timestamps always included)
 prosey dQw4w9WgXcQ --json
 
+# Transcript only, no video details
+prosey dQw4w9WgXcQ --no-details
+
 # List available transcript languages
 prosey dQw4w9WgXcQ --list
+
+# Show video metadata
+prosey info dQw4w9WgXcQ
 ```
 
 ## Options
 
-| Flag                    | Description                                                                                                    |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `--lang <code>`         | Language code (e.g. `en`, `fr`). Auto-detected if omitted.                                                     |
-| `-t`, `--timestamps`    | Prepend `[MM:SS]` to each line in text output.                                                                 |
-| `--list`                | List available transcript languages for the video, then exit.                                                  |
-| `-o`, `--output <path>` | Write output to file instead of stdout.                                                                        |
-| `--json`                | Output transcript as a JSON array. Each item includes `text`, `offset` (seconds), `duration`, and `timestamp`. |
-| `--text`                | Output as plain text (default).                                                                                |
-| `--no-decode-entities`  | Preserve raw HTML entities (e.g. `&#39;`). Decoded by default in text mode.                                    |
-| `--help`                | Show help message and exit.                                                                                    |
-| `--version`             | Show version number and exit.                                                                                  |
+| Flag | Description |
+|---|---|
+| `--lang <code>` | Language code (e.g. `en`, `fr`). Auto-detected if omitted. |
+| `-t`, `--timestamps` | Prepend `[MM:SS]` to each line in text output. |
+| `--list` | List available transcript languages for the video, then exit. |
+| `-o`, `--output <path>` | Write output to file instead of stdout. |
+| `--json` | Output transcript as a JSON array. Each item includes `text`, `offset` (seconds), `duration`, and `timestamp`. |
+| `--text` | Output as plain text (default). |
+| `--details` | Prepend video details (title, channel, duration, views, description) to the transcript (default). |
+| `--no-details` | Suppress video details, transcript only. |
+| `--no-decode-entities` | Preserve raw HTML entities (e.g. `&#39;`). Decoded by default in text mode. |
+| `--help` | Show help message and exit. |
+| `--version` | Show version number and exit. |
 
 ## JSON format
 
@@ -77,7 +108,8 @@ When `--json` is used, the output is an array of objects:
 ]
 ```
 
-`timestamp` is always present in JSON mode regardless of the `-t` flag.
+`timestamp` is always present in JSON mode. Video details are suppressed
+(silently) since JSON is structured data.
 
 ## Binary
 
@@ -90,11 +122,18 @@ bun run build
 
 ## Development
 
+This project uses **[Bun](https://bun.sh)** for development.
+
 ```bash
 bun run typecheck   # TypeScript check
-bun run start       # Run the CLI
-bun run build       # Compile binary
+bun run start       # Run the CLI from source
+bun run test        # Run unit tests
+bun run build       # Compile standalone binary
 ```
+
+Before publishing to npm, `bun run build:node` compiles the TypeScript source
+into a Node-compatible JS bundle at `bin/prosey.js`. This happens automatically
+via the `prepack` hook.
 
 ## How it works
 

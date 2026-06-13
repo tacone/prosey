@@ -1,15 +1,50 @@
 {
   "name": "prosey",
+  "version": "0.1.0",
+  "description": "Download YouTube video transcripts from the CLI",
   "module": "src/index.ts",
   "type": "module",
-  "private": true,
+  "bin": {
+    "prosey": "./bin/prosey.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "start": "bun run src/index.ts",
     "build": "bun build src/index.ts --compile --outfile dist/prosey",
+    "build:node": "bun build src/index.ts --target node --outfile bin/prosey.js",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "prettier": "prettier --write .",
+    "prepack": "bun run build:node",
     "prepare": "husky"
+  },
+  "author": "tacone <tacone@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tacone/prosey.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tacone/prosey/issues"
+  },
+  "homepage": "https://github.com/tacone/prosey#readme",
+  "keywords": [
+    "youtube",
+    "transcript",
+    "subtitles",
+    "captions",
+    "cli",
+    "npx",
+    "bun"
+  ],
+  "engines": {
+    "node": ">=20"
   },
   "devDependencies": {
     "@types/bun": "latest",

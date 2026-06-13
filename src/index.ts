@@ -1,3 +1,6 @@
+#!/usr/bin/env node
+
+import { writeFile } from "node:fs/promises";
 import { fetchTranscript, listLanguages } from "youtube-transcript-plus";
 import type { CaptionTrackInfo, VideoDetails } from "youtube-transcript-plus";
 import { formatWithTimestamps, toText, toJSON, formatDuration, decodeEntities } from "./format";
@@ -208,7 +211,7 @@ try {
     const output = detailsBlock + "\n\n\n" + transcript + "\n";
 
     if (outputPath) {
-      await Bun.write(outputPath, output);
+      await writeFile(outputPath, output, "utf8");
     } else {
       console.log(output);
     }
@@ -224,7 +227,7 @@ try {
         : toText(segments, decode) + "\n";
 
     if (outputPath) {
-      await Bun.write(outputPath, output);
+      await writeFile(outputPath, output, "utf8");
     } else {
       console.log(output);
     }
