@@ -16,9 +16,12 @@ Arguments:
 
 Options:
   --lang <code>          Language code (e.g. en, fr). Auto-detect if omitted.
-  --timestamps           Include timestamps [MM:SS] in output.
+  -t, --timestamps       Include timestamps [MM:SS] in output.
   --list                 List available transcript languages and exit.
   -o, --output <path>    Write output to file instead of stdout.
+  --json                 Output transcript as JSON array.
+  --text                 Output as plain text (default).
+  --no-decode-entities   Preserve HTML entities (decoded by default).
   --help                 Show this help message.
   --version              Show version.
 
@@ -26,7 +29,8 @@ Examples:
   ${NAME} dQw4w9WgXcQ
   ${NAME} https://www.youtube.com/watch?v=dQw4w9WgXcQ --lang es
   ${NAME} dQw4w9WgXcQ --timestamps -o transcript.txt
-  ${NAME} dQw4w9WgXcQ --list`;
+  ${NAME} dQw4w9WgXcQ --list
+  ${NAME} dQw4w9WgXcQ --json --timestamps`;
 }
 
 function formatTime(seconds: number): string {
@@ -35,8 +39,39 @@ function formatTime(seconds: number): string {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-function formatWithTimestamps(segments: TranscriptSegment[]): string {
-  return segments.map((s) => `[${formatTime(s.offset)}] ${s.text}`).join("\n");
+function decodeEntities(text: string): string {
+  return text.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)));
+}
+
+function formatWithTimestamps(segments: TranscriptSegment[], decode: boolean): string {
+  return segments
+    .map((s) => {
+      const text = decode ? decodeEntities(s.text) : s.text;
+      return `[${formatTime(s.offset)}] ${text}`;
+    })
+    .join("\n");
+}
+
+function toText(segments: TranscriptSegment[], decode: boolean): string {
+  return segments
+    .map((s) => (decode ? decodeEntities(s.text) : s.text))
+    .join(" ")
+    .replace(/ +/g, " ");
+}
+
+function toJSON(segments: TranscriptSegment[], withTimestamps: boolean, decode: boolean): string {
+  const data = segments.map((s) => {
+    const obj: Record<string, unknown> = {
+      text: decode ? decodeEntities(s.text) : s.text,
+      offset: s.offset,
+      duration: s.duration,
+    };
+    if (withTimestamps) {
+      obj.timestamp = formatTime(s.offset);
+    }
+    return obj;
+  });
+  return JSON.stringify(data, null, 2);
 }
 
 function printLanguages(languages: CaptionTrackInfo[]): void {
@@ -64,6 +99,8 @@ let lang: string | undefined;
 let timestamps = false;
 let listOnly = false;
 let outputPath: string | undefined;
+let outputJson = false;
+let noDecode = false;
 
 for (let i = 0; i < args.length; i++) {
   const arg = args[i];
@@ -74,7 +111,7 @@ for (let i = 0; i < args.length; i++) {
       console.error("Error: --lang requires a language code");
       process.exit(1);
     }
-  } else if (arg === "--timestamps") {
+  } else if (arg === "--timestamps" || arg === "-t") {
     timestamps = true;
   } else if (arg === "--list") {
     listOnly = true;
@@ -84,6 +121,12 @@ for (let i = 0; i < args.length; i++) {
       console.error("Error: -o/--output requires a file path");
       process.exit(1);
     }
+  } else if (arg === "--json") {
+    outputJson = true;
+  } else if (arg === "--text") {
+    outputJson = false;
+  } else if (arg === "--no-decode-entities") {
+    noDecode = true;
   } else if (arg.startsWith("-")) {
     console.error(`Unknown option: ${arg}`);
     process.exit(1);
@@ -109,14 +152,18 @@ try {
     ? await fetchTranscript(videoId, { lang })
     : await fetchTranscript(videoId);
 
-  const text = timestamps
-    ? formatWithTimestamps(segments) + "\n"
-    : toPlainText(segments, " ") + "\n";
+  const decode = !noDecode;
+
+  const output = outputJson
+    ? toJSON(segments, timestamps, decode) + "\n"
+    : timestamps
+      ? formatWithTimestamps(segments, decode) + "\n"
+      : toText(segments, decode) + "\n";
 
   if (outputPath) {
-    await Bun.write(outputPath, text);
+    await Bun.write(outputPath, output);
   } else {
-    console.log(text);
+    console.log(output);
   }
 } catch (err: unknown) {
   const message = err instanceof Error ? err.message : String(err);
