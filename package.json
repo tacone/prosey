@@ -7,8 +7,7 @@
     "start": "bun run src/index.ts",
     "build": "bun build src/index.ts --compile --outfile dist/prosey",
     "typecheck": "tsc --noEmit",
-    "prettier": "prettier --check .",
-    "prettier:write": "prettier --write .",
+    "prettier": "prettier --write .",
     "prepare": "husky"
   },
   "devDependencies": {
