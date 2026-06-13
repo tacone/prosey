@@ -1,11 +1,11 @@
 {
-  "name": "prosey",
+  "name": "@tacone/prosey",
   "version": "0.1.0",
   "description": "Download YouTube video transcripts from the CLI",
   "module": "src/index.ts",
   "type": "module",
   "bin": {
-    "prosey": "./bin/prosey.js"
+    "prosey": "bin/prosey.js"
   },
   "files": [
     "bin/",
@@ -22,7 +22,7 @@
     "typecheck": "tsc --noEmit",
     "prettier": "prettier --write .",
     "prepack": "bun run build:node",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "lint-staged": {
     "*": "prettier --write --ignore-unknown"
