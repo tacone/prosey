@@ -201,7 +201,14 @@ if (!videoId) {
   process.exit(1);
 }
 
-videoId = extractVideoId(videoId);
+const extracted = extractVideoId(videoId);
+
+if (!extracted) {
+  console.error("Error: invalid YouTube video URL or ID");
+  process.exit(65);
+}
+
+videoId = extracted;
 
 try {
   if (mode === "info") {

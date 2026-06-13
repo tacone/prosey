@@ -7,11 +7,11 @@ const RE_YOUTUBE =
   /(?:v=|\/|v\/|embed\/|watch\?.*v=|youtu\.be\/|\/v\/|e\/|watch\?.*vi?=|\/embed\/|\/v\/|vi?\/|watch\?.*vi?=|youtu\.be\/|\/vi?\/|\/e\/)([a-zA-Z0-9_-]{11})/i;
 const RE_BARE_ID = /^[a-zA-Z0-9_-]{11}$/;
 
-export function extractVideoId(input: string): string {
+export function extractVideoId(input: string): string | null {
   if (RE_BARE_ID.test(input)) return input;
   const match = input.match(RE_YOUTUBE);
-  if (match) return match[1] || input;
-  return input;
+  if (match) return match[1] || null;
+  return null;
 }
 
 export interface CacheOptions {
