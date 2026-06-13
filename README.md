@@ -7,24 +7,18 @@ You can read, skim, search, copy, and manipulate the text using the tools you lo
 ## Usage
 
 ```bash
-npx @tacone/prosey dQw4w9WgXcQ
-npx @tacone/prosey dQw4w9WgXcQ --lang es -o transcript.txt
-npx @tacone/prosey info dQw4w9WgXcQ
+npx @tacone/prosey 771PQEDeRmw
+npx @tacone/prosey https://youtu.be/771PQEDeRmw --lang es -o transcript.txt
+npx @tacone/prosey info 771PQEDeRmw
 ```
 
 ## Install
 
-### Quick — no install (npx)
-
-```bash
-npx prosey dQw4w9WgXcQ
-```
-
 ### Global install (npm)
 
 ```bash
-npm install -g prosey
-prosey dQw4w9WgXcQ
+npm install -g @tacone/prosey
+prosey 771PQEDeRmw
 ```
 
 ### From source (development)
@@ -36,7 +30,7 @@ and running the TypeScript source directly.
 git clone https://github.com/tacone/prosey.git
 cd prosey
 bun install
-bun run start -- dQw4w9WgXcQ
+bun run start -- 771PQEDeRmw
 ```
 
 ### Prebuilt binary
@@ -57,28 +51,28 @@ stdout by default, with video details prepended.
 
 ```bash
 # Basic — plain text with details
-prosey dQw4w9WgXcQ
+npx @tacone/prosey 771PQEDeRmw
 
 # Specify language
-prosey https://www.youtube.com/watch?v=dQw4w9WgXcQ --lang es
+npx @tacone/prosey https://youtu.be/771PQEDeRmw --lang es
 
 # Include timestamps
-prosey dQw4w9WgXcQ -t
+npx @tacone/prosey 771PQEDeRmw -t
 
 # Save to file
-prosey dQw4w9WgXcQ -o transcript.txt
+npx @tacone/prosey 771PQEDeRmw -o transcript.txt
 
 # JSON output (timestamps always included)
-prosey dQw4w9WgXcQ --json
+npx @tacone/prosey 771PQEDeRmw --json
 
 # Transcript only, no video details
-prosey dQw4w9WgXcQ --no-details
+npx @tacone/prosey 771PQEDeRmw --no-details
 
 # List available transcript languages
-prosey dQw4w9WgXcQ --list
+npx @tacone/prosey 771PQEDeRmw --list
 
 # Show video metadata
-prosey info dQw4w9WgXcQ
+npx @tacone/prosey info 771PQEDeRmw
 ```
 
 ## Options
@@ -121,7 +115,7 @@ Build a single-file binary with no external dependencies:
 
 ```bash
 bun run build
-./dist/prosey dQw4w9WgXcQ
+./dist/prosey 771PQEDeRmw
 ```
 
 ## Development
