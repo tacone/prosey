@@ -4,7 +4,9 @@ import { writeFile } from "node:fs/promises";
 import { fetchTranscript, listLanguages } from "youtube-transcript-plus";
 import type { CaptionTrackInfo, VideoDetails } from "youtube-transcript-plus";
 import { formatWithTimestamps, toText, toJSON, formatDuration, decodeEntities } from "./format";
-import { loadConfig } from "./config";
+import { loadConfig, resetConfig } from "./config";
+import type { ProseyConfig } from "./config";
+import { summarize } from "./summarize";
 
 const NAME = "prosey";
 const VERSION = "0.1.0";
@@ -14,11 +16,13 @@ function help(): string {
 
 Usage: ${NAME} [options] <video-url-or-id>
        ${NAME} info [options] <video-url-or-id>
+       ${NAME} summarize [options] <video-url-or-id>
 
 Download a YouTube video transcript or show video details.
 
 Commands:
   info                  Show video metadata (title, channel, duration, etc.)
+  summarize             Pipe transcript to the command configured in [summarize]
 
 Arguments:
   video-url-or-id        YouTube URL (full or short) or bare video ID
@@ -33,6 +37,7 @@ Options:
   --details              Prepend video details to transcript (default, text only).
   --no-details           Suppress video details, transcript only.
   --no-decode-entities   Preserve HTML entities (decoded by default).
+  --reset-config         Reset config file to defaults and exit.
   --help                 Show this help message.
   --version              Show version.
 
@@ -122,11 +127,20 @@ if (args.includes("--version")) {
   process.exit(0);
 }
 
-const config = await loadConfig().catch(() => ({}));
+if (args.includes("--reset-config")) {
+  const path = await resetConfig();
+  console.log(`Config reset to defaults: ${path}`);
+  process.exit(0);
+}
+
+const config: ProseyConfig = await loadConfig().catch(() => ({}) as ProseyConfig);
 
 let mode = "transcript";
 if (args[0] === "info") {
   mode = "info";
+  args.splice(0, 1);
+} else if (args[0] === "summarize") {
+  mode = "summarize";
   args.splice(0, 1);
 }
 
@@ -193,7 +207,27 @@ try {
     process.exit(0);
   }
 
-  if (listOnly) {
+  if (mode === "summarize") {
+    if (!config.summarize?.command) {
+      console.error("Error: [summarize] section with a command is required in config");
+      process.exit(1);
+    }
+
+    const segments = lang
+      ? await fetchTranscript(videoId, { lang })
+      : await fetchTranscript(videoId);
+
+    const prompt = config.summarize.prompt ?? "";
+    const transcript = toText(segments, !noDecode);
+
+    const output = await summarize({ prompt, command: config.summarize.command, transcript });
+
+    if (outputPath) {
+      await writeFile(outputPath, output, "utf8");
+    } else {
+      console.log(output);
+    }
+  } else if (listOnly) {
     const languages = await listLanguages(videoId);
     printLanguages(languages);
     process.exit(0);

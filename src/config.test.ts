@@ -3,7 +3,7 @@ import { rm, readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
-import { configPath, loadConfig } from "./config";
+import { configPath, loadConfig, resetConfig } from "./config";
 
 const ORIGINAL_XDG = process.env.XDG_CONFIG_HOME;
 const ORIGINAL_PROSEY_CONFIG = process.env.PROSEY_CONFIG_PATH;
@@ -54,7 +54,7 @@ describe("loadConfig", () => {
 
     const content = await readFile(tmpConfig, "utf8");
     expect(content).toContain("[summarize]");
-    expect(content).toContain('command = "ai summarize"');
+    expect(content).toContain('command = "opencode"');
   });
 
   test("reads existing config file", async () => {
@@ -63,7 +63,7 @@ describe("loadConfig", () => {
     await loadConfig();
     const config = await loadConfig();
     expect(config.summarize?.prompt).toBeString();
-    expect(config.summarize?.command).toBe("ai summarize");
+    expect(config.summarize?.command).toBe("opencode");
   });
 
   test("handles invalid TOML gracefully", async () => {
@@ -72,5 +72,27 @@ describe("loadConfig", () => {
 
     const config = await loadConfig();
     expect(config).toEqual({});
+  });
+});
+
+describe("resetConfig", () => {
+  const tmpConfig = join(import.meta.dir, "..", "tmp-reset-config.toml");
+
+  afterEach(async () => {
+    try {
+      await rm(tmpConfig);
+    } catch {}
+  });
+
+  test("overwrites existing file with defaults", async () => {
+    process.env.PROSEY_CONFIG_PATH = tmpConfig;
+
+    await Bun.write(tmpConfig, "# garbage");
+    const path = await resetConfig();
+    expect(path).toBe(tmpConfig);
+
+    const content = await readFile(tmpConfig, "utf8");
+    expect(content).toContain("[summarize]");
+    expect(content).toContain('command = "opencode"');
   });
 });

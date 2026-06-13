@@ -10,4 +10,4 @@ Focus on the key points and main arguments.
 """
 
 # Command to execute with the prompt piped via stdin.
-command = "ai summarize"
+command = "opencode run"

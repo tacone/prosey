@@ -52,3 +52,11 @@ export async function loadConfig(): Promise<ProseyConfig> {
     return {};
   }
 }
+
+export async function resetConfig(): Promise<string> {
+  const path = configPath();
+  const dir = configDir();
+  await ensureDir(dir);
+  await writeFile(path, await readDefaultConfig(), "utf8");
+  return path;
+}

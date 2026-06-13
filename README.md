@@ -42,10 +42,14 @@ Grab a compiled binary from the `dist/` directory (requires no runtime).
 ```
 prosey [options] <video-url-or-id>
 prosey info [options] <video-url-or-id>
+prosey summarize [options] <video-url-or-id>
 ```
 
 Pass a full YouTube URL or a bare video ID. The transcript is printed to
 stdout by default, with video details prepended.
+
+The `summarize` command fetches a transcript, prepends the prompt from the
+`[summarize]` config section, and pipes the result to the configured command.
 
 ### Examples
 
@@ -73,6 +77,9 @@ npx @tacone/prosey 771PQEDeRmw --list
 
 # Show video metadata
 npx @tacone/prosey info 771PQEDeRmw
+
+# Summarize via the configured command
+npx @tacone/prosey summarize 771PQEDeRmw
 ```
 
 ## Options
@@ -132,6 +139,23 @@ bun run build       # Compile standalone binary
 Before publishing to npm, `bun run build:node` compiles the TypeScript source
 into a Node-compatible JS bundle at `bin/prosey.js`. This happens automatically
 via the `prepack` hook.
+
+## Configuration
+
+Prosey reads configuration from a TOML file. The location follows the
+[XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html)
+(`~/.config/prosey/config.toml`), or you can set the `PROSEY_CONFIG_PATH`
+environment variable to use a custom path.
+
+The config file is created automatically on first run with default values.
+Use `--reset-config` to restore the defaults at any time.
+
+The `[summarize]` section configures the `summarize` command:
+
+| Key       | Description                                      |
+| --------- | ------------------------------------------------ |
+| `prompt`  | Instruction prepended to the transcript          |
+| `command` | Shell command that receives the prompt via stdin |
 
 ## How it works
 
