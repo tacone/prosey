@@ -30,7 +30,7 @@ Examples:
   ${NAME} https://www.youtube.com/watch?v=dQw4w9WgXcQ --lang es
   ${NAME} dQw4w9WgXcQ --timestamps -o transcript.txt
   ${NAME} dQw4w9WgXcQ --list
-  ${NAME} dQw4w9WgXcQ --json --timestamps`;
+  ${NAME} dQw4w9WgXcQ --json`;
 }
 
 function formatTime(seconds: number): string {
@@ -59,18 +59,13 @@ function toText(segments: TranscriptSegment[], decode: boolean): string {
     .replace(/ +/g, " ");
 }
 
-function toJSON(segments: TranscriptSegment[], withTimestamps: boolean, decode: boolean): string {
-  const data = segments.map((s) => {
-    const obj: Record<string, unknown> = {
-      text: decode ? decodeEntities(s.text) : s.text,
-      offset: s.offset,
-      duration: s.duration,
-    };
-    if (withTimestamps) {
-      obj.timestamp = formatTime(s.offset);
-    }
-    return obj;
-  });
+function toJSON(segments: TranscriptSegment[], decode: boolean): string {
+  const data = segments.map((s) => ({
+    text: decode ? decodeEntities(s.text) : s.text,
+    offset: s.offset,
+    duration: s.duration,
+    timestamp: formatTime(s.offset),
+  }));
   return JSON.stringify(data, null, 2);
 }
 
@@ -155,7 +150,7 @@ try {
   const decode = !noDecode;
 
   const output = outputJson
-    ? toJSON(segments, timestamps, decode) + "\n"
+    ? toJSON(segments, decode) + "\n"
     : timestamps
       ? formatWithTimestamps(segments, decode) + "\n"
       : toText(segments, decode) + "\n";
