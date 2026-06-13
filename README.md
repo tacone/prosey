@@ -4,8 +4,12 @@
 
 You can read, skim, search, copy, and manipulate the text using the tools you love the most.
 
+## Usage
+
 ```bash
-npx prosey https://www.youtube.com/watch?v=dQw4w9WgXcQ
+npx @tacone/prosey dQw4w9WgXcQ
+npx @tacone/prosey dQw4w9WgXcQ --lang es -o transcript.txt
+npx @tacone/prosey info dQw4w9WgXcQ
 ```
 
 ## Install
