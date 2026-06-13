@@ -1,6 +1,6 @@
 {
   "name": "@tacone/prosey",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Download YouTube video transcripts from the CLI",
   "module": "src/index.ts",
   "type": "module",
