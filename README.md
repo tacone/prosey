@@ -153,6 +153,13 @@ Transcripts and summaries are cached to `/tmp/prosey/`. Repeated invocations
 for the same video and options are instant and work offline. Use `--no-cache`
 to skip cache reads and force a fresh fetch.
 
+## Exit codes
+
+| Code | Meaning                 |
+| ---- | ----------------------- |
+| `0`  | Success                 |
+| `65` | Invalid video URL or ID |
+
 ## How it works
 
 prosey uses YouTube's Innertube API via the
