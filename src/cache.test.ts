@@ -2,7 +2,7 @@ import { describe, expect, test, afterEach } from "bun:test";
 import { rm, readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { cacheKey, cacheDir, readCache, writeCache } from "./cache";
+import { cacheKey, cacheDir, readCache, writeCache, extractVideoId } from "./cache";
 
 const testDir = "/tmp/prosey/test-cache-spec";
 
@@ -41,6 +41,30 @@ describe("cacheDir", () => {
     const key = cacheKey("abc123def45", {});
     const dir = cacheDir("abc123def45", {});
     expect(dir).toBe(`/tmp/prosey/${key}`);
+  });
+});
+
+describe("extractVideoId", () => {
+  test("bare ID passes through", () => {
+    expect(extractVideoId("dQw4w9WgXcQ")).toBe("dQw4w9WgXcQ");
+  });
+
+  test("full watch URL", () => {
+    expect(extractVideoId("https://www.youtube.com/watch?v=jNAAG3Ma5K8")).toBe("jNAAG3Ma5K8");
+  });
+
+  test("watch URL with extra query params", () => {
+    expect(
+      extractVideoId("https://www.youtube.com/watch?v=jNAAG3Ma5K8&pp=ygUKc3BhY2V4IGlwbw%3D%3D"),
+    ).toBe("jNAAG3Ma5K8");
+  });
+
+  test("short youtu.be URL", () => {
+    expect(extractVideoId("https://youtu.be/dQw4w9WgXcQ")).toBe("dQw4w9WgXcQ");
+  });
+
+  test("embed URL", () => {
+    expect(extractVideoId("https://www.youtube.com/embed/dQw4w9WgXcQ")).toBe("dQw4w9WgXcQ");
   });
 });
 

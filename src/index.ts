@@ -7,7 +7,7 @@ import { formatWithTimestamps, toText, toJSON, formatDuration, decodeEntities } 
 import { loadConfig, resetConfig } from "./config";
 import type { ProseyConfig } from "./config";
 import { summarize } from "./summarize";
-import { cacheDir, readCache, writeCache } from "./cache";
+import { cacheDir, readCache, writeCache, extractVideoId } from "./cache";
 
 const NAME = "prosey";
 const VERSION = "0.1.0";
@@ -200,6 +200,8 @@ if (!videoId) {
   console.log(help());
   process.exit(1);
 }
+
+videoId = extractVideoId(videoId);
 
 try {
   if (mode === "info") {
