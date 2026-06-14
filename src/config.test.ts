@@ -53,7 +53,9 @@ describe("loadConfig", () => {
     expect(existsSync(tmpConfig)).toBe(true);
 
     const content = await readFile(tmpConfig, "utf8");
+    expect(content).toContain("[ai]");
     expect(content).toContain("[summarize]");
+    expect(content).toContain("[transcribe]");
     expect(content).toContain("command = ");
   });
 
@@ -63,7 +65,7 @@ describe("loadConfig", () => {
     await loadConfig();
     const config = await loadConfig();
     expect(config.summarize?.prompt).toBeString();
-    expect(config.summarize?.command).toBeString();
+    expect(config.ai?.command).toBeString();
   });
 
   test("handles invalid TOML gracefully", async () => {

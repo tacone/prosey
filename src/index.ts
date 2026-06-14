@@ -60,8 +60,10 @@ Options:
   -t, --timestamps       Include timestamps [MM:SS] in output.
   --list                 List available transcript languages and exit.
   -o, --output <path>    Write output to file instead of stdout.
-  --json                 Output as JSON (suppresses details).
-  --text                 Output as plain text (default).
+  --format <type>        Output format: text (default), json, or markdown.
+  --json                 Shortcut for --format json.
+  --text                 Shortcut for --format text.
+  --markdown             Shortcut for --format markdown.
   --details              Prepend video details to transcript (default, text only).
   --no-details           Suppress video details, transcript only.
   --no-decode-entities   Preserve HTML entities (decoded by default).
@@ -230,6 +232,7 @@ let timestamps = false;
 let listOnly = false;
 let outputPath: string | undefined;
 let outputJson = false;
+let format: "text" | "json" | "markdown" = "text";
 let noDecode = false;
 let showDetails = true;
 let noCache = false;
@@ -259,8 +262,27 @@ for (let i = 0; i < args.length; i++) {
     }
   } else if (arg === "--json") {
     outputJson = true;
+    format = "json";
   } else if (arg === "--text") {
     outputJson = false;
+    format = "text";
+  } else if (arg === "--markdown") {
+    format = "markdown";
+  } else if (arg === "--format") {
+    const val = args[++i];
+    if (val === "json") {
+      format = "json";
+      outputJson = true;
+    } else if (val === "text") {
+      format = "text";
+      outputJson = false;
+    } else if (val === "markdown") {
+      format = "markdown";
+      outputJson = false;
+    } else {
+      console.error("Error: --format must be text, json, or markdown");
+      exitProcess(1);
+    }
   } else if (arg === "--details") {
     showDetails = true;
   } else if (arg === "--no-details") {
@@ -363,8 +385,11 @@ try {
   }
 
   if (mode === "summarize") {
-    if (!config.summarize?.command) {
-      console.error("Error: [summarize] section with a command is required in config");
+    const sumCmd = config.summarize?.command ?? config.ai?.command;
+    if (!sumCmd) {
+      console.error(
+        "Error: no command configured for summarize. Set [ai].command or [summarize].command in config.",
+      );
       exitProcess(1);
     }
 
@@ -398,14 +423,14 @@ try {
       debug("Cache written: transcript.json");
     }
 
-    const prompt = config.summarize!.prompt ?? "";
+    const prompt = config.summarize?.prompt ?? "";
     const transcriptText = toText(segments, !noDecode);
 
     if (!summary) {
       info(`Summarizing...`);
       summary = await summarize({
         prompt,
-        command: config.summarize!.command!,
+        command: sumCmd,
         transcript: transcriptText,
         cwd: dir,
       });
@@ -420,6 +445,66 @@ try {
   } else if (listOnly) {
     const languages = await listLanguages(videoId);
     printLanguages(languages);
+    exitProcess(0);
+  }
+
+  if (format === "markdown") {
+    const transcribeCmd = config.transcribe?.command ?? config.ai?.command;
+    if (!transcribeCmd) {
+      console.error(
+        "Error: no command configured for transcribe. Set [ai].command or [transcribe].command in config.",
+      );
+      exitProcess(1);
+    }
+
+    const cacheOpts = { lang, mode: "transcribe", noDecode };
+    const dir = cacheDir(videoId, cacheOpts);
+    let segments: TranscriptSegment[] | null = null;
+    let md: string | null = null;
+
+    startTimer();
+
+    if (!noCache) {
+      const cachedSegments = await readCache(dir, "transcript.json");
+      const cachedMd = await readCache(dir, "transcript.md");
+      if (cachedSegments && cachedMd) {
+        info("Transcript cached");
+        debug("Cache hit:", dir);
+        segments = JSON.parse(cachedSegments);
+        md = cachedMd;
+      } else {
+        debug("Cache miss:", dir);
+      }
+    } else {
+      debug("Cache skipped (--no-cache)");
+    }
+
+    if (!segments) {
+      info("Fetching transcript...");
+      segments = lang ? await fetchTranscript(videoId, { lang }) : await fetchTranscript(videoId);
+      info(`Transcript: ${segments.length} segments`);
+      await writeCache(dir, "transcript.json", JSON.stringify(segments));
+      debug("Cache written: transcript.json");
+    }
+
+    const prompt = config.transcribe?.prompt ?? "";
+    const transcriptText = toText(segments, !noDecode);
+
+    if (!md) {
+      info(`Transcribing...`);
+      md = await summarize({
+        prompt,
+        command: transcribeCmd,
+        transcript: transcriptText,
+        cwd: dir,
+      });
+      info("Transcription ready");
+      await writeCache(dir, "transcript.md", md);
+      debug("Cache written: transcript.md");
+    }
+
+    const formatted = noFormat ? md : await formatMd(md);
+    await outputText(formatted + "\n");
     exitProcess(0);
   }
 

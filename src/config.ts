@@ -8,7 +8,14 @@ import { load } from "js-toml";
 export interface ProseyConfig {
   pager?: string;
   hints?: boolean;
+  ai?: {
+    command?: string;
+  };
   summarize?: {
+    prompt?: string;
+    command?: string;
+  };
+  transcribe?: {
     prompt?: string;
     command?: string;
   };
@@ -27,6 +34,11 @@ pager = "auto"
 # Can also be set via PROSEY_HINTS env var (yes, no, 1, 0, true, false).
 hints = true
 
+[ai]
+# Default command for AI operations (summarize, transcribe).
+# Can be overridden per-section via the command key below.
+command = "opencode run"
+
 [summarize]
 # Prompt sent to the command via stdin.
 # Customize this to change how transcripts are summarized.
@@ -34,23 +46,20 @@ prompt = """
 Write a comprehensive summary of the following transcription.
 """
 
-# Command to execute with the prompt and transcript piped via stdin.
-# The transcript is appended to the prompt automatically.
-#
-# Available options:
-#
-#   opencode run                    — full access (default)
-#   opencode run --permissions read  — read-only (view files, no edits)
-#
-#   claude -p "" --print            — full access (--print for clean output)
-#   claude --permission-mode plan -p "" --print  — read-only (plan/read only)
-#
-#   copilot -sp ""                  — full access (-s = silent, -p = prompt)
-#   copilot -sp "" --deny-all-tools — read-only (no shell/write access)
-#
-#   codex --sandbox default -p ""   — full access
-#   codex --sandbox read-only -p "" — read-only
-command = "opencode run"
+# Command override for summarize. Uncomment to use a different command
+# than the one specified in [ai].
+# command = "opencode run"
+
+[transcribe]
+# Prompt sent to the command via stdin.
+# Customize this to change how transcripts are formatted as markdown.
+prompt = """
+Convert this transcript to clean, readable markdown.
+"""
+
+# Command override for transcribe. Uncomment to use a different command
+# than the one specified in [ai].
+# command = "opencode run"
 `;
 
 async function readDefaultConfig(): Promise<string> {
