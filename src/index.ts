@@ -10,6 +10,7 @@ import { summarize } from "./summarize";
 import { cacheDir, readCache, writeCache, extractVideoId } from "./cache";
 import { enableDebug, debug } from "./debug";
 import pkg from "../package.json";
+import prettier from "prettier";
 
 const NAME = "prosey";
 const VERSION = pkg.version;
@@ -42,6 +43,7 @@ Options:
   --no-decode-entities   Preserve HTML entities (decoded by default).
   --reset-config         Reset config file to defaults and exit.
   --no-cache             Skip cache and overwrite cache files.
+  --no-format            Skip prettier formatting.
   --debug                Print debug information to stderr.
   --help                 Show this help message.
   --version              Show version.
@@ -120,6 +122,14 @@ function printLanguages(languages: CaptionTrackInfo[]): void {
   console.log(`Available transcripts (${languages.length}):\n${rows.join("\n")}`);
 }
 
+async function formatMd(text: string): Promise<string> {
+  try {
+    return await prettier.format(text, { parser: "markdown" });
+  } catch {
+    return text;
+  }
+}
+
 const args = process.argv.slice(2);
 
 if (args.length === 0 || args.includes("--help")) {
@@ -156,6 +166,7 @@ let outputJson = false;
 let noDecode = false;
 let showDetails = true;
 let noCache = false;
+let noFormat = false;
 let debugMode = false;
 
 for (let i = 0; i < args.length; i++) {
@@ -187,6 +198,8 @@ for (let i = 0; i < args.length; i++) {
     showDetails = false;
   } else if (arg === "--no-cache") {
     noCache = true;
+  } else if (arg === "--no-format") {
+    noFormat = true;
   } else if (arg === "--debug") {
     debugMode = true;
   } else if (arg === "--no-decode-entities") {
@@ -280,10 +293,12 @@ try {
       debug("Cache written: summary.md");
     }
 
+    const formatted = noFormat ? summary : await formatMd(summary);
+
     if (outputPath) {
-      await writeFile(outputPath, summary, "utf8");
+      await writeFile(outputPath, formatted, "utf8");
     } else {
-      console.log(summary);
+      console.log(formatted);
     }
     process.exit(0);
   } else if (listOnly) {
