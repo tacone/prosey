@@ -7,6 +7,10 @@
 # Can also be set via the PROSEY_PAGER env var (takes precedence).
 pager = "auto"
 
+# Show hints for missing tools (e.g. markdown highlighter).
+# Can also be set via PROSEY_HINTS env var (yes, no, 1, 0, true, false).
+hints = true
+
 [summarize]
 
 # Prompt sent to the command via stdin.

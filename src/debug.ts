@@ -45,3 +45,11 @@ export function resetTimer(): void {
   lastTime = performance.now();
   resumed = false;
 }
+
+const YELLOW = "\x1b[33m";
+
+export function hint(message: string): void {
+  console.error(
+    YELLOW + message + RESET + " " + GRAY + "[use prosey config to disable hints]" + RESET,
+  );
+}

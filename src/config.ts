@@ -7,6 +7,7 @@ import { load } from "js-toml";
 
 export interface ProseyConfig {
   pager?: string;
+  hints?: boolean;
   summarize?: {
     prompt?: string;
     command?: string;
@@ -21,6 +22,10 @@ const FALLBACK_CONFIG_TOML = `# Default prosey configuration
 # Set to a custom command (e.g. "less -R") to override.
 # Can also be set via the PROSEY_PAGER env var (takes precedence).
 pager = "auto"
+
+# Show hints for missing tools (e.g. markdown highlighter).
+# Can also be set via PROSEY_HINTS env var (yes, no, 1, 0, true, false).
+hints = true
 
 [summarize]
 # Prompt sent to the command via stdin.

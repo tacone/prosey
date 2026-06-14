@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { setLevel, info, debug, startTimer, resetTimer } from "./debug";
+import { setLevel, info, debug, startTimer, resetTimer, hint } from "./debug";
 import type { LogLevel } from "./debug";
 import { spawn } from "node:child_process";
 import { writeFile } from "node:fs/promises";
@@ -51,6 +51,8 @@ Options:
   --no-format            Skip prettier formatting.
   --no-pager             Disable pager for stdout output.
   --pager                Use pager for stdout output (default).
+  --no-hints             Disable hints.
+  --hints                Show hints (default).
   -q, --quiet            Suppress all stderr logging.
   -v, --verbose          Print debug information to stderr.
   --help                 Show this help message.
@@ -212,6 +214,7 @@ let showDetails = true;
 let noCache = false;
 let noFormat = false;
 let usePager = true;
+let useHints = true;
 let logLevel: LogLevel = "normal";
 
 for (let i = 0; i < args.length; i++) {
@@ -249,6 +252,10 @@ for (let i = 0; i < args.length; i++) {
     usePager = false;
   } else if (arg === "--pager") {
     usePager = true;
+  } else if (arg === "--no-hints") {
+    useHints = false;
+  } else if (arg === "--hints") {
+    useHints = true;
   } else if (arg === "--quiet" || arg === "-q") {
     logLevel = "quiet";
   } else if (arg === "--verbose" || arg === "-v") {
@@ -297,6 +304,24 @@ setLevel(logLevel);
 resetTimer();
 pagerCmd = usePager ? detectPager(config.pager) : null;
 debug("Pager:", pagerCmd ?? "none");
+
+{
+  const envHints = process.env.PROSEY_HINTS;
+  if (envHints !== undefined) {
+    useHints = envHints === "yes" || envHints === "1" || envHints === "true";
+  } else if (config.hints !== undefined) {
+    useHints = config.hints;
+  }
+}
+
+if (useHints) {
+  const hasMarkdownPager =
+    pagerCmd === "bat -lmd" || pagerCmd === "glow" || pagerCmd === "mdcat -l -p";
+  if (!hasMarkdownPager) {
+    hint("Tip: install a markdown highlighter for better output (e.g. bat, glow, mdcat)");
+  }
+}
+
 debug("Config file:", configPath());
 debug("Video ID:", videoId);
 debug("Mode:", mode);
