@@ -58,7 +58,7 @@ describe("detectPager", () => {
     // In CI or minimal environments, no pagers may be installed
     // If a pager IS found, it should be one of the expected ones
     if (pager !== null) {
-      const known = ["bat -lmd", "glow", "mdcat -l -p", "less"];
+      const known = ["bat -lmd --style plain", "glow -p", "mdcat -l -p", "less"];
       expect(known).toContain(pager);
     }
   });

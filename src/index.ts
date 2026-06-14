@@ -24,12 +24,9 @@ const versionCheck = checkVersion().then((v) => {
   latestVersion = v;
 });
 
-async function exitProcess(code: number): Promise<void> {
-  if (useHints && code === 0) {
-    const latest = latestVersion ?? (await versionCheck.then(() => latestVersion));
-    if (latest && latest !== VERSION) {
-      hint(`📦 New version available: ${latest}`);
-    }
+function exitProcess(code: number): never {
+  if (useHints && code === 0 && latestVersion && latestVersion !== VERSION) {
+    hint(`📦 New version available: ${latestVersion}`);
   }
   process.exit(code);
 }
@@ -332,7 +329,7 @@ debug("Pager:", pagerCmd ?? "none");
 
 if (useHints) {
   const hasMarkdownPager =
-    pagerCmd === "bat -lmd" || pagerCmd === "glow" || pagerCmd === "mdcat -l -p";
+    pagerCmd === "bat -lmd --style plain" || pagerCmd === "glow -p" || pagerCmd === "mdcat -l -p";
   if (!hasMarkdownPager) {
     hint("Tip: install a markdown highlighter for better output (e.g. bat, glow, mdcat)");
   }
@@ -342,6 +339,9 @@ debug("Config file:", configPath());
 debug("Video ID:", videoId);
 debug("Mode:", mode);
 if (lang) debug("Language:", lang);
+
+// Give the version check a moment to complete
+await Promise.race([versionCheck, new Promise((r) => setTimeout(r, 1000))]);
 
 try {
   if (mode === "info") {

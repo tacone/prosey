@@ -180,7 +180,7 @@ Use `--reset-config` to restore the defaults at any time.
 ### `pager`
 
 Pager command for transcript and summary output. Defaults to `"auto"`, which
-detects the first available of: `bat -lmd` → `glow` → `mdcat -l -p` → `less`.
+detects the first available of: `bat -lmd --style plain` → `glow -p` → `mdcat -l -p` → `less`.
 Set to a custom command (e.g. `"less -R"`) to override. The `PROSEY_PAGER`
 environment variable takes precedence over this setting.
 
