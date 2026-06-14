@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { spawn } from "node:child_process";
+import { execSync, spawn } from "node:child_process";
 import { writeFile } from "node:fs/promises";
 import { fetchTranscript, listLanguages } from "youtube-transcript-plus";
 import type { CaptionTrackInfo, VideoDetails, TranscriptSegment } from "youtube-transcript-plus";
@@ -48,6 +48,8 @@ Options:
   --reset-config         Reset config file to defaults and exit.
   --no-cache             Skip cache and overwrite cache files.
   --no-format            Skip prettier formatting.
+  --no-pager             Disable pager for stdout output.
+  --pager                Use pager for stdout output (default).
   -q, --quiet            Suppress all stderr logging.
   -v, --verbose          Print debug information to stderr.
   --help                 Show this help message.
@@ -135,6 +137,61 @@ async function formatMd(text: string): Promise<string> {
   }
 }
 
+function hasCommand(cmd: string): boolean {
+  try {
+    execSync(`command -v ${cmd} 2>/dev/null`, { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function detectPager(): string | null {
+  const env = process.env.PROSEY_PAGER;
+  if (env !== undefined && env !== "" && env !== "auto") return env;
+
+  if (hasCommand("bat")) return "bat -lmd";
+  if (hasCommand("glow")) return "glow";
+  if (hasCommand("less")) return "less";
+  return null;
+}
+
+async function outputText(text: string): Promise<void> {
+  if (outputPath) {
+    await writeFile(outputPath, text, "utf8");
+    return;
+  }
+
+  if (!pagerCmd || !process.stdout.isTTY) {
+    process.stdout.write(text);
+    return;
+  }
+
+  const parts = pagerCmd.split(/\s+/);
+  const proc = spawn(parts[0]!, parts.slice(1), {
+    stdio: ["pipe", "inherit", "inherit"],
+  }) as import("node:child_process").ChildProcess;
+
+  await new Promise<void>((resolve) => {
+    let done = false;
+    proc.on("error", () => {
+      if (done) return;
+      done = true;
+      process.stdout.write(text);
+      resolve();
+    });
+    proc.on("exit", () => {
+      if (done) return;
+      done = true;
+      resolve();
+    });
+    proc.stdin!.write(text);
+    proc.stdin!.end();
+  });
+}
+
+let pagerCmd: string | null = null;
+
 const args = process.argv.slice(2);
 
 if (args.length === 0 || args.includes("--help")) {
@@ -172,6 +229,7 @@ let noDecode = false;
 let showDetails = true;
 let noCache = false;
 let noFormat = false;
+let usePager = true;
 let logLevel: LogLevel = "normal";
 
 for (let i = 0; i < args.length; i++) {
@@ -205,6 +263,10 @@ for (let i = 0; i < args.length; i++) {
     noCache = true;
   } else if (arg === "--no-format") {
     noFormat = true;
+  } else if (arg === "--no-pager") {
+    usePager = false;
+  } else if (arg === "--pager") {
+    usePager = true;
   } else if (arg === "--quiet" || arg === "-q") {
     logLevel = "quiet";
   } else if (arg === "--verbose" || arg === "-v") {
@@ -251,6 +313,8 @@ videoId = extracted;
 
 setLevel(logLevel);
 resetTimer();
+pagerCmd = usePager ? detectPager() : null;
+debug("Pager:", pagerCmd ?? "none");
 debug("Config file:", configPath());
 debug("Video ID:", videoId);
 debug("Mode:", mode);
@@ -320,12 +384,7 @@ try {
     }
 
     const formatted = noFormat ? summary : await formatMd(summary);
-
-    if (outputPath) {
-      await writeFile(outputPath, formatted, "utf8");
-    } else {
-      console.log(formatted);
-    }
+    await outputText(formatted + "\n");
     process.exit(0);
   } else if (listOnly) {
     const languages = await listLanguages(videoId);
@@ -387,11 +446,7 @@ try {
       : toText(segments, decode);
     const output = detailsBlock + "\n\n\n" + transcriptText + "\n";
 
-    if (outputPath) {
-      await writeFile(outputPath, output, "utf8");
-    } else {
-      console.log(output);
-    }
+    await outputText(output);
   } else {
     const output = outputJson
       ? toJSON(segments, decode) + "\n"
@@ -399,11 +454,7 @@ try {
         ? formatWithTimestamps(segments, decode) + "\n"
         : toText(segments, decode) + "\n";
 
-    if (outputPath) {
-      await writeFile(outputPath, output, "utf8");
-    } else {
-      console.log(output);
-    }
+    await outputText(output);
   }
 } catch (err: unknown) {
   const message = err instanceof Error ? err.message : String(err);
