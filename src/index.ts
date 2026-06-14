@@ -146,12 +146,16 @@ function hasCommand(cmd: string): boolean {
   }
 }
 
-function detectPager(): string | null {
+function detectPager(cfg?: ProseyConfig): string | null {
   const env = process.env.PROSEY_PAGER;
   if (env !== undefined && env !== "" && env !== "auto") return env;
 
+  const cfgVal = cfg?.pager;
+  if (cfgVal !== undefined && cfgVal !== "" && cfgVal !== "auto") return cfgVal;
+
   if (hasCommand("bat")) return "bat -lmd";
   if (hasCommand("glow")) return "glow";
+  if (hasCommand("mdcat")) return "mdcat -l -p";
   if (hasCommand("less")) return "less";
   return null;
 }
@@ -313,7 +317,7 @@ videoId = extracted;
 
 setLevel(logLevel);
 resetTimer();
-pagerCmd = usePager ? detectPager() : null;
+pagerCmd = usePager ? detectPager(config) : null;
 debug("Pager:", pagerCmd ?? "none");
 debug("Config file:", configPath());
 debug("Video ID:", videoId);

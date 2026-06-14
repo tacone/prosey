@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { load } from "js-toml";
 
 export interface ProseyConfig {
+  pager?: string;
   summarize?: {
     prompt?: string;
     command?: string;
@@ -14,6 +15,12 @@ export interface ProseyConfig {
 
 const FALLBACK_CONFIG_TOML = `# Default prosey configuration
 # Created automatically on first run. Edit as needed.
+
+# Pager command for transcript and summary output.
+# Defaults to "auto": bat -lmd → glow → mdcat -l -p → less
+# Set to a custom command (e.g. "less -R") to override.
+# Can also be set via the PROSEY_PAGER env var (takes precedence).
+pager = "auto"
 
 [summarize]
 # Prompt sent to the command via stdin.
