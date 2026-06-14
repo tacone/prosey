@@ -4,6 +4,15 @@
 
 You can read, skim, search, copy, and manipulate the text using the tools you love the most.
 
+## Features
+
+- **Transcript download** — Fetch YouTube transcripts as plain text or JSON
+- **AI summarization** — Pipe transcripts to any AI agent (opencode, Claude, Copilot, Codex) via a configurable command
+- **Config file** — Machine-wide TOML config; use `prosey config` to access and edit your configuration
+- **Smart pager** — Auto-detects bat, glow, mdcat, or less for highlighted output
+- **Disk caching** — Transcripts and summaries cached to `/tmp/prosey` for instant repeat
+- **Multiple formats** — Plain text, JSON, with or without video details and HTML decoding
+
 ## Quickstart
 
 Try it out immediately with npx:
