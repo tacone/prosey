@@ -7,7 +7,7 @@
 # Can also be set via the PROSEY_PAGER env var (takes precedence).
 pager = "auto"
 
-# Show hints for missing tools (e.g. markdown highlighter).
+# Show hints when available
 # Can also be set via PROSEY_HINTS env var (yes, no, 1, 0, true, false).
 hints = true
 
@@ -21,19 +21,13 @@ Write a comprehensive summary of the following transcription.
 """
 
 # Command to execute with the prompt and transcript piped via stdin.
-# The transcript is appended to the prompt automatically.
+# The transcript will be appended to the prompt automatically.
 #
-# Available options:
+# Examples:
 #
-#   opencode run                    — full access (default)
-#   opencode run --permissions read  — read-only (view files, no edits)
+#   OPENCODE_PERMISSION='{"read":"allow","write":"deny","edit":"deny","bash":"deny","glob":"deny","grep":"deny","webfetch":\"deny\",\"task\":\"deny\",\"todowrite\":\"deny\",\"websearch\":\"deny","lsp":"deny"}' opencode run --pure
+#   claude --permission-mode plan --print  --read-only
+#   copilot -s --deny-all-tools --read-only
+#   codex --sandbox read-only --read-only
 #
-#   claude -p "" --print            — full access (--print for clean output)
-#   claude --permission-mode plan -p "" --print  — read-only (plan/read only)
-#
-#   copilot -sp ""                  — full access (-s = silent, -p = prompt)
-#   copilot -sp "" --deny-all-tools — read-only (no shell/write access)
-#
-#   codex --sandbox default -p ""   — full access
-#   codex --sandbox read-only -p "" — read-only
 command = "OPENCODE_PERMISSION='{\"read\":\"allow\",\"write\":\"deny\",\"edit\":\"deny\",\"bash\":\"deny\",\"glob\":\"deny\",\"grep\":\"deny\",\"webfetch\":\"deny\",\"task\":\"deny\",\"todowrite\":\"deny\",\"websearch\":\"deny\",\"lsp\":\"deny\"}' opencode run --pure"
