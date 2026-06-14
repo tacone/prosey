@@ -1,19 +1,30 @@
 # Prosey
 
-**Prosey** downloads YouTube transcripts to be printed or saved to a file.
+**Prosey** is a CLI tool to download and display video transcriptions from YouTube, so you can get the information you're looking for without wasting hours.
 
-You can read, skim, search, copy, and manipulate the text using the tools you love the most.
+The main use cases are:
+
+- **Summarize** a YouTube video and display it in the CLI with a single command (quicker).
+- **Read** video captions, formatted and organized in chapters like the original video (often needs more time).
+
+Both uses need an AI assistant on your system (default: [opencode](https://opencode.ai/), use `prosey config` to configure your own).
+
+If we detect a syntax highlighter on your system, you'll get a nice colored output.
+
+Prosey can also output or store the native json format verbatim.
 
 ## Features
 
-| Feature                              | Description                                                                                     |
-| ------------------------------------ | ----------------------------------------------------------------------------------------------- |
-| **📋&nbsp;Transcript&nbsp;download** | Fetch YouTube transcripts as plain text or JSON                                                 |
-| **🤖&nbsp;AI&nbsp;summarization**    | Pipe transcripts to any AI agent (opencode, Claude, Copilot, Codex)                             |
-| **🎨&nbsp;Smart&nbsp;pager**         | Automatic syntax highlighting if bat, glow or mdcat are installed (or configure your own pager) |
-| **🛠️&nbsp;Customization**            | Use `prosey config` to access and edit your configuration                                       |
-| **💾&nbsp;Disk&nbsp;caching**        | Transcripts and summaries cached for instant repeat                                             |
-| **📄&nbsp;Supported&nbsp;formats**   | Plain text and JSON                                                                             |
+| Feature                                    | Description                                                                                     |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| **💡&nbsp;&nbsp;Summarize**                | Fetch and summarize a video transcription                                                       |
+| **📖&nbsp;&nbsp;Read**                     | Fetch and display the transcript formatted in Markdown                                          |
+| **📋&nbsp;&nbsp;Transcript&nbsp;download** | Fetch YouTube transcripts as plain text or JSON verbatim                                        |
+| **🤖&nbsp;&nbsp;AI&nbsp;summarization**    | Pipe transcripts to any AI agent (opencode, Claude, Copilot, Codex)                             |
+| **🎨&nbsp;&nbsp;Smart&nbsp;pager**         | Automatic syntax highlighting if bat, glow or mdcat are installed (or configure your own pager) |
+| **🛠️&nbsp;&nbsp;Customization**            | Use `prosey config` to access and edit your configuration / customize the prompts               |
+| **💾&nbsp;&nbsp;Disk&nbsp;caching**        | Transcripts and summaries are cached on disk for instant re-read                                |
+| **📄&nbsp;&nbsp;Supported&nbsp;formats**   | Plain text and JSON                                                                             |
 
 ## Quickstart
 
