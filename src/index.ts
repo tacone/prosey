@@ -26,7 +26,9 @@ const versionCheck = checkVersion().then((v) => {
 
 function exitProcess(code: number): never {
   if (useHints && code === 0 && latestVersion && latestVersion !== VERSION) {
-    hint(`📦 New version available: ${latestVersion}`);
+    hint(
+      `📦 New version available: ${latestVersion} — use npm/pnpm/bun -g i ${pkg.name} to upgrade`,
+    );
   }
   process.exit(code);
 }
