@@ -554,8 +554,13 @@ try {
       });
       cachedInfo = infoJson;
       const chapterValue = formatChaptersAsJson(extractChapters(result.videoDetails.description));
+      const truncatedInfo = JSON.stringify({
+        title: result.videoDetails.title,
+        channel: result.videoDetails.author,
+        description: result.videoDetails.description.slice(0, 1000),
+      });
       const transcriptText = toText(segments, !noDecode);
-      const structuredContent = `INFO:\n${infoJson}\n\nTIMESTAMPS:\n${chapterValue}\n\nTEXT:\n${transcriptText}`;
+      const structuredContent = `INFO:\n${truncatedInfo}\n\nTIMESTAMPS:\n${chapterValue}\n\nTEXT:\n${transcriptText}`;
 
       if (dryRun) {
         await outputText(`${prompt}\n\n${structuredContent}\n`);
@@ -607,7 +612,13 @@ try {
         chapterValue = cachedChapters ?? "not available";
       }
       const transcriptText = toText(segments, !noDecode);
-      const structuredContent = `INFO:\n${cachedInfo}\n\nTIMESTAMPS:\n${chapterValue}\n\nTEXT:\n${transcriptText}`;
+      const cachedInfoObj = JSON.parse(cachedInfo);
+      const truncatedInfo = JSON.stringify({
+        title: cachedInfoObj.title,
+        channel: cachedInfoObj.channel,
+        description: cachedInfoObj.description.slice(0, 1000),
+      });
+      const structuredContent = `INFO:\n${truncatedInfo}\n\nTIMESTAMPS:\n${chapterValue}\n\nTEXT:\n${transcriptText}`;
 
       if (!md) {
         info(`Transcribing...`);
