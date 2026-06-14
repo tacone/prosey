@@ -95,6 +95,11 @@ npx @tacone/prosey summarize 771PQEDeRmw
 | `--details`             | Prepend video details (title, channel, duration, views, description) to the transcript (default).              |
 | `--no-details`          | Suppress video details, transcript only.                                                                       |
 | `--no-decode-entities`  | Preserve raw HTML entities (e.g. `&#39;`). Decoded by default in text mode.                                    |
+| `--no-cache`            | Skip cache reads and force a fresh fetch.                                                                      |
+| `--no-format`           | Skip prettier markdown formatting on summarize output.                                                         |
+| `-q`, `--quiet`         | Suppress all stderr logging.                                                                                   |
+| `-v`, `--verbose`       | Print debug information to stderr.                                                                             |
+| `--reset-config`        | Reset config file to defaults and exit.                                                                        |
 | `--help`                | Show help message and exit.                                                                                    |
 | `--version`             | Show version number and exit.                                                                                  |
 
