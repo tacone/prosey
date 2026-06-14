@@ -41,6 +41,7 @@ Usage: ${NAME} [options] <video-url-or-id>
        ${NAME} info [options] <video-url-or-id>
        ${NAME} summarize [options] <video-url-or-id>
        ${NAME} config
+       ${NAME} help
 
 Download a YouTube video transcript or show video details.
 
@@ -49,6 +50,7 @@ Commands:
   info                  Show video metadata (title, channel, duration, etc.)
   summarize             Pipe transcript to the command configured in [summarize]
   config                Open config file in \$EDITOR
+  help                  Show this help message
 
 Arguments:
   video-url-or-id        YouTube URL (full or short) or bare video ID

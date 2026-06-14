@@ -68,6 +68,7 @@ prosey read [options] <video-url-or-id>
 prosey info [options] <video-url-or-id>
 prosey summarize [options] <video-url-or-id>
 prosey config
+prosey help
 ```
 
 Pass a full YouTube URL or a bare video ID. `read` is the default command, so
@@ -79,6 +80,8 @@ The `summarize` command fetches a transcript, prepends the prompt from the
 
 The `config` command opens your config file in `$EDITOR` for editing. If
 `$EDITOR` is not set, the config file path is printed.
+
+The `help` command shows the help message, same as `--help`.
 
 ### Examples
 
