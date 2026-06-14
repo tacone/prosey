@@ -12,11 +12,25 @@ import { loadConfig, resetConfig, configPath } from "./config";
 import type { ProseyConfig } from "./config";
 import { summarize } from "./summarize";
 import { cacheDir, readCache, writeCache, extractVideoId } from "./cache";
+import { checkVersion } from "./version-check";
 import pkg from "../package.json";
 import prettier from "prettier";
 
 const NAME = "prosey";
 const VERSION = pkg.version;
+
+let latestVersion: string | null = null;
+
+checkVersion().then((v) => {
+  latestVersion = v;
+});
+
+function exitProcess(code: number): never {
+  if (useHints && code === 0 && latestVersion && latestVersion !== VERSION) {
+    hint(`📦 New version available: ${latestVersion}`);
+  }
+  process.exit(code);
+}
 
 function help(): string {
   return `${NAME} v${VERSION}
@@ -180,18 +194,18 @@ const args = process.argv.slice(2);
 
 if (args.length === 0 || args.includes("--help")) {
   console.log(help());
-  process.exit(0);
+  exitProcess(0);
 }
 
 if (args.includes("--version")) {
   console.log(VERSION);
-  process.exit(0);
+  exitProcess(0);
 }
 
 if (args.includes("--reset-config")) {
   const path = await resetConfig();
   console.log(`Config reset to defaults: ${path}`);
-  process.exit(0);
+  exitProcess(0);
 }
 
 const config: ProseyConfig = await loadConfig().catch(() => ({}) as ProseyConfig);
@@ -224,7 +238,7 @@ for (let i = 0; i < args.length; i++) {
     lang = args[++i] ?? undefined;
     if (!lang) {
       console.error("Error: --lang requires a language code");
-      process.exit(1);
+      exitProcess(1);
     }
   } else if (arg === "--timestamps" || arg === "-t") {
     timestamps = true;
@@ -234,7 +248,7 @@ for (let i = 0; i < args.length; i++) {
     outputPath = args[++i] ?? undefined;
     if (!outputPath) {
       console.error("Error: -o/--output requires a file path");
-      process.exit(1);
+      exitProcess(1);
     }
   } else if (arg === "--json") {
     outputJson = true;
@@ -264,7 +278,7 @@ for (let i = 0; i < args.length; i++) {
     noDecode = true;
   } else if (arg.startsWith("-")) {
     console.error(`Unknown option: ${arg}`);
-    process.exit(1);
+    exitProcess(1);
   } else {
     videoId = arg;
   }
@@ -282,20 +296,20 @@ if (mode === "config") {
   } else {
     console.log(`Config file: ${path}`);
   }
-  process.exit(0);
+  exitProcess(0);
 }
 
 if (!videoId) {
   console.error("Error: missing video URL or ID");
   console.log(help());
-  process.exit(1);
+  exitProcess(1);
 }
 
 const extracted = extractVideoId(videoId);
 
 if (!extracted) {
   console.error("Error: invalid YouTube video URL or ID");
-  process.exit(65);
+  exitProcess(65);
 }
 
 videoId = extracted;
@@ -335,13 +349,13 @@ try {
     } else {
       printVideoInfo(result.videoDetails);
     }
-    process.exit(0);
+    exitProcess(0);
   }
 
   if (mode === "summarize") {
     if (!config.summarize?.command) {
       console.error("Error: [summarize] section with a command is required in config");
-      process.exit(1);
+      exitProcess(1);
     }
 
     const cacheOpts = { lang, mode: "summarize", noDecode };
@@ -392,11 +406,11 @@ try {
 
     const formatted = noFormat ? summary : await formatMd(summary);
     await outputText(formatted + "\n");
-    process.exit(0);
+    exitProcess(0);
   } else if (listOnly) {
     const languages = await listLanguages(videoId);
     printLanguages(languages);
-    process.exit(0);
+    exitProcess(0);
   }
 
   const decode = !noDecode;
@@ -466,5 +480,5 @@ try {
 } catch (err: unknown) {
   const message = err instanceof Error ? err.message : String(err);
   console.error(`Error: ${message}`);
-  process.exit(1);
+  exitProcess(1);
 }
