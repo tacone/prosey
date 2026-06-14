@@ -7,7 +7,13 @@ export interface SummarizeOptions {
   cwd?: string;
 }
 
-function executeCommand(command: string, input: string, cwd?: string): Promise<string> {
+export type ExecuteCommand = (command: string, input: string, cwd?: string) => Promise<string>;
+
+export const defaultExecuteCommand: ExecuteCommand = (
+  command: string,
+  input: string,
+  cwd?: string,
+) => {
   return new Promise((resolve, reject) => {
     const proc = spawn(command, [], { shell: true, stdio: "pipe", cwd });
 
@@ -32,12 +38,20 @@ function executeCommand(command: string, input: string, cwd?: string): Promise<s
     proc.stdin!.write(input);
     proc.stdin!.end();
   });
-}
+};
 
-export async function summarize(options: SummarizeOptions): Promise<string> {
+export async function summarize(
+  options: SummarizeOptions,
+  execCommand: ExecuteCommand = defaultExecuteCommand,
+): Promise<string> {
   const { prompt, command, transcript, cwd } = options;
+
+  if (!prompt) {
+    throw new Error("No prompt configured. A prompt is required in the config.");
+  }
+
   const fullPrompt = `${prompt}\n\n${transcript}`;
-  const output = await executeCommand(command, fullPrompt, cwd);
+  const output = await execCommand(command, fullPrompt, cwd);
 
   const cleaned = output.startsWith(fullPrompt)
     ? output.slice(fullPrompt.length).replace(/\n+$/, "")

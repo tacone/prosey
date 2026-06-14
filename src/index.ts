@@ -11,6 +11,12 @@ import { formatWithTimestamps, toText, toJSON, formatDuration, decodeEntities } 
 import { loadConfig, resetConfig, configPath } from "./config";
 import type { ProseyConfig } from "./config";
 import { summarize } from "./summarize";
+import {
+  resolveSummarizeCmd,
+  resolveSummarizePrompt,
+  resolveTranscribeCmd,
+  resolveTranscribePrompt,
+} from "./config-resolve";
 import { cacheDir, readCache, writeCache, extractVideoId } from "./cache";
 import { checkVersion } from "./version-check";
 import pkg from "../package.json";
@@ -385,7 +391,7 @@ try {
   }
 
   if (mode === "summarize") {
-    const sumCmd = config.summarize?.command ?? config.ai?.command;
+    const sumCmd = resolveSummarizeCmd(config);
     if (!sumCmd) {
       console.error(
         "Error: no command configured for summarize. Set [ai].command or [summarize].command in config.",
@@ -423,7 +429,13 @@ try {
       debug("Cache written: transcript.json");
     }
 
-    const prompt = config.summarize?.prompt ?? "";
+    const prompt = resolveSummarizePrompt(config) ?? "";
+    if (!prompt) {
+      console.error(
+        "Error: no prompt configured. Set a prompt in the [summarize] section of your config.",
+      );
+      exitProcess(1);
+    }
     const transcriptText = toText(segments, !noDecode);
 
     if (!summary) {
@@ -449,10 +461,10 @@ try {
   }
 
   if (format === "markdown") {
-    const transcribeCmd = config.transcribe?.command ?? config.ai?.command;
+    const transcribeCmd = resolveTranscribeCmd(config);
     if (!transcribeCmd) {
       console.error(
-        "Error: no command configured for transcribe. Set [ai].command or [transcribe].command in config.",
+        "Error: no command configured for transcribe. Set [transcribe].command, [ai].command, or [summarize].command in config.",
       );
       exitProcess(1);
     }
@@ -487,7 +499,13 @@ try {
       debug("Cache written: transcript.json");
     }
 
-    const prompt = config.transcribe?.prompt ?? "";
+    const prompt = resolveTranscribePrompt(config) ?? "";
+    if (!prompt) {
+      console.error(
+        "Error: no prompt configured. Set a prompt in the [transcribe] or [summarize] section of your config.",
+      );
+      exitProcess(1);
+    }
     const transcriptText = toText(segments, !noDecode);
 
     if (!md) {
