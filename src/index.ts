@@ -8,7 +8,8 @@ import { loadConfig, resetConfig, configPath } from "./config";
 import type { ProseyConfig } from "./config";
 import { summarize } from "./summarize";
 import { cacheDir, readCache, writeCache, extractVideoId } from "./cache";
-import { enableDebug, debug } from "./debug";
+import { setLevel, info, debug, startTimer, resetTimer } from "./debug";
+import type { LogLevel } from "./debug";
 import pkg from "../package.json";
 import prettier from "prettier";
 
@@ -44,7 +45,8 @@ Options:
   --reset-config         Reset config file to defaults and exit.
   --no-cache             Skip cache and overwrite cache files.
   --no-format            Skip prettier formatting.
-  --debug                Print debug information to stderr.
+  -q, --quiet            Suppress all stderr logging.
+  -v, --verbose          Print debug information to stderr.
   --help                 Show this help message.
   --version              Show version.
 
@@ -167,7 +169,7 @@ let noDecode = false;
 let showDetails = true;
 let noCache = false;
 let noFormat = false;
-let debugMode = false;
+let logLevel: LogLevel = "normal";
 
 for (let i = 0; i < args.length; i++) {
   const arg = args[i];
@@ -200,8 +202,10 @@ for (let i = 0; i < args.length; i++) {
     noCache = true;
   } else if (arg === "--no-format") {
     noFormat = true;
-  } else if (arg === "--debug") {
-    debugMode = true;
+  } else if (arg === "--quiet" || arg === "-q") {
+    logLevel = "quiet";
+  } else if (arg === "--verbose" || arg === "-v") {
+    logLevel = "verbose";
   } else if (arg === "--no-decode-entities") {
     noDecode = true;
   } else if (arg.startsWith("-")) {
@@ -227,7 +231,8 @@ if (!extracted) {
 
 videoId = extracted;
 
-if (debugMode) enableDebug();
+setLevel(logLevel);
+resetTimer();
 debug("Config file:", configPath());
 debug("Video ID:", videoId);
 debug("Mode:", mode);
@@ -255,10 +260,13 @@ try {
     let segments: TranscriptSegment[] | null = null;
     let summary: string | null = null;
 
+    startTimer();
+
     if (!noCache) {
       const cachedSegments = await readCache(dir, "transcript.json");
       const cachedSummary = await readCache(dir, "summary.md");
       if (cachedSegments && cachedSummary) {
+        info("Transcript cached");
         debug("Cache hit:", dir);
         segments = JSON.parse(cachedSegments);
         summary = cachedSummary;
@@ -270,9 +278,9 @@ try {
     }
 
     if (!segments) {
-      debug("Fetching transcript...");
+      info("Fetching transcript...");
       segments = lang ? await fetchTranscript(videoId, { lang }) : await fetchTranscript(videoId);
-      debug(`Transcript fetched: ${segments.length} segments`);
+      info(`Transcript: ${segments.length} segments`);
       await writeCache(dir, "transcript.json", JSON.stringify(segments));
       debug("Cache written: transcript.json");
     }
@@ -281,14 +289,14 @@ try {
     const transcriptText = toText(segments, !noDecode);
 
     if (!summary) {
-      debug("Running command:", config.summarize.command);
+      info(`Running summary elaboration...`);
       summary = await summarize({
         prompt,
         command: config.summarize.command,
         transcript: transcriptText,
         cwd: dir,
       });
-      debug("Command exit: 0");
+      info("Summary ready");
       await writeCache(dir, "summary.md", summary);
       debug("Cache written: summary.md");
     }
@@ -313,9 +321,12 @@ try {
   let segments: TranscriptSegment[] | null = null;
   let videoDetailsCache: VideoDetails | null = null;
 
+  startTimer();
+
   if (!noCache) {
     const cached = await readCache(dir, "transcript.json");
     if (cached) {
+      info("Transcript cached");
       debug("Cache hit:", dir);
       segments = JSON.parse(cached);
     } else {
@@ -326,7 +337,7 @@ try {
   }
 
   if (!segments) {
-    debug("Fetching transcript...");
+    info("Fetching transcript...");
     if (showDetails && !outputJson) {
       const opts = lang ? { lang, videoDetails: true as const } : { videoDetails: true as const };
       const result = (await fetchTranscript(videoId, opts)) as {
@@ -338,6 +349,7 @@ try {
     } else {
       segments = lang ? await fetchTranscript(videoId, { lang }) : await fetchTranscript(videoId);
     }
+    info(`Transcript: ${segments.length} segments`);
     await writeCache(dir, "transcript.json", JSON.stringify(segments));
   }
 
