@@ -20,8 +20,8 @@ You can read, skim, search, copy, and manipulate the text using the tools you lo
 Try it out immediately with npx:
 
 ```bash
-npx @tacone/prosey read 771PQEDeRmw
-npx @tacone/prosey read https://youtu.be/771PQEDeRmw --lang es -o transcript.txt
+npx @tacone/prosey 771PQEDeRmw
+npx @tacone/prosey https://youtu.be/771PQEDeRmw --lang es -o transcript.txt
 ```
 
 ## Install
