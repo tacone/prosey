@@ -60,7 +60,7 @@ Options:
   -t, --timestamps       Include timestamps [MM:SS] in output.
   --list                 List available transcript languages and exit.
   -o, --output <path>    Write output to file instead of stdout.
-  --format <type>        Output format: text (default), json, or markdown.
+  --format <type>        Output format: markdown (default), text, or json.
   --json                 Shortcut for --format json.
   --text                 Shortcut for --format text.
   --markdown             Shortcut for --format markdown.
@@ -232,7 +232,7 @@ let timestamps = false;
 let listOnly = false;
 let outputPath: string | undefined;
 let outputJson = false;
-let format: "text" | "json" | "markdown" = "text";
+let format: "text" | "json" | "markdown" = "markdown";
 let noDecode = false;
 let showDetails = true;
 let noCache = false;
