@@ -20,8 +20,8 @@ You can read, skim, search, copy, and manipulate the text using the tools you lo
 Try it out immediately with npx:
 
 ```bash
-npx @tacone/prosey 771PQEDeRmw
-npx @tacone/prosey https://youtu.be/771PQEDeRmw --lang es -o transcript.txt
+npx @tacone/prosey read 771PQEDeRmw
+npx @tacone/prosey read https://youtu.be/771PQEDeRmw --lang es -o transcript.txt
 ```
 
 ## Install
@@ -71,12 +71,16 @@ prosey config
 prosey help
 ```
 
-Pass a full YouTube URL or a bare video ID. `read` is the default command, so
-`prosey <id>` is equivalent to `prosey read <id>`. The transcript is printed to
-stdout by default, with video details prepended.
+`summarize` is the default command, so `prosey <id>` runs the AI summarizer.
+Use `prosey read <id>` to download and print a richly formatted transcript.
 
 The `summarize` command fetches a transcript, prepends the prompt from the
-`[summarize]` config section, and pipes the result to the configured command.
+`[summarize]` config section, and pipes the result to the configured AI command.
+
+The `read` command downloads the transcript and prints it to stdout (plain text,
+markdown, or JSON). This is useful when you don't need AI processing.
+
+The `info` command shows video metadata (title, channel, duration, views).
 
 The `config` command opens your config file in `$EDITOR` for editing. If
 `$EDITOR` is not set, the config file path is printed.
@@ -86,32 +90,32 @@ The `help` command shows the help message, same as `--help`.
 ### Examples
 
 ```bash
-# Basic — plain text with details
+# Run the AI summarizer (default command)
 prosey 771PQEDeRmw
 
+# Download a plain transcript with details
+prosey read 771PQEDeRmw
+
 # Specify language
-prosey https://youtu.be/771PQEDeRmw --lang es
+prosey read https://youtu.be/771PQEDeRmw --lang es
 
 # Include timestamps
-prosey 771PQEDeRmw -t
+prosey read 771PQEDeRmw -t
 
-# Save to file
-prosey 771PQEDeRmw -o transcript.txt
+# Save transcript to file
+prosey read 771PQEDeRmw -o transcript.txt
 
 # JSON output (timestamps always included)
-prosey 771PQEDeRmw --json
+prosey read 771PQEDeRmw --json
 
 # Transcript only, no video details
-prosey 771PQEDeRmw --no-details
+prosey read 771PQEDeRmw --no-details
 
 # List available transcript languages
-prosey 771PQEDeRmw --list
+prosey read 771PQEDeRmw --list
 
 # Show video metadata
 prosey info 771PQEDeRmw
-
-# Summarize via the configured command
-prosey summarize 771PQEDeRmw
 
 # Edit config in $EDITOR
 prosey config
@@ -126,7 +130,7 @@ prosey config
 | `--list`                | List available transcript languages for the video, then exit.                                                  |
 | `-o`, `--output <path>` | Write output to file instead of stdout.                                                                        |
 | `--json`                | Output transcript as a JSON array. Each item includes `text`, `offset` (seconds), `duration`, and `timestamp`. |
-| `--text`                | Output as plain text (default).                                                                                |
+| `--text`                | Output as plain text (default for `prosey read`).                                                              |
 | `--details`             | Prepend video details (title, channel, duration, views, description) to the transcript (default).              |
 | `--no-details`          | Suppress video details, transcript only.                                                                       |
 | `--no-decode-entities`  | Preserve raw HTML entities (e.g. `&#39;`). Decoded by default in text mode.                                    |
