@@ -20,8 +20,8 @@ function stamp(): string {
   }
   const elapsed = now - lastTime;
   lastTime = now;
-  if (elapsed < 1000) return `+${elapsed.toFixed(0)}ms`;
-  return `+${(elapsed / 1000).toFixed(1)}s`;
+  const text = elapsed < 1000 ? `${elapsed.toFixed(0)}ms` : `${(elapsed / 1000).toFixed(1)}s`;
+  return text.padStart(5);
 }
 
 const INFO_BEFORE = "\x1b[0m\x1b[2m\x1b[1m";

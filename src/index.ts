@@ -289,7 +289,7 @@ try {
     const transcriptText = toText(segments, !noDecode);
 
     if (!summary) {
-      info(`Running summary elaboration...`);
+      info(`Summarizing...`);
       summary = await summarize({
         prompt,
         command: config.summarize.command,
