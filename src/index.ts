@@ -22,6 +22,10 @@ import { checkVersion } from "./version-check";
 import pkg from "../package.json";
 import prettier from "prettier";
 
+process.stdout.on("error", (err: NodeJS.ErrnoException) => {
+  if (err.code === "EPIPE") process.exit(0);
+});
+
 const NAME = "prosey";
 const VERSION = pkg.version;
 
@@ -443,7 +447,7 @@ try {
     const transcriptText = toText(segments, !noDecode);
 
     if (dryRun) {
-      console.log(`${prompt}\n\n${transcriptText}`);
+      await outputText(`${prompt}\n\n${transcriptText}\n`);
       exitProcess(0);
     }
 
@@ -518,7 +522,7 @@ try {
     const transcriptText = toText(segments, !noDecode);
 
     if (dryRun) {
-      console.log(`${prompt}\n\n${transcriptText}`);
+      await outputText(`${prompt}\n\n${transcriptText}\n`);
       exitProcess(0);
     }
 
