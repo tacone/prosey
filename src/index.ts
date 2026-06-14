@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { spawn } from "node:child_process";
 import { writeFile } from "node:fs/promises";
 import { fetchTranscript, listLanguages } from "youtube-transcript-plus";
 import type { CaptionTrackInfo, VideoDetails, TranscriptSegment } from "youtube-transcript-plus";
@@ -22,12 +23,14 @@ function help(): string {
 Usage: ${NAME} [options] <video-url-or-id>
        ${NAME} info [options] <video-url-or-id>
        ${NAME} summarize [options] <video-url-or-id>
+       ${NAME} config
 
 Download a YouTube video transcript or show video details.
 
 Commands:
   info                  Show video metadata (title, channel, duration, etc.)
   summarize             Pipe transcript to the command configured in [summarize]
+  config                Open config file in \$EDITOR
 
 Arguments:
   video-url-or-id        YouTube URL (full or short) or bare video ID
@@ -153,7 +156,7 @@ if (args.includes("--reset-config")) {
 const config: ProseyConfig = await loadConfig().catch(() => ({}) as ProseyConfig);
 
 let mode = "transcript";
-const subcmdIndex = args.findIndex((a) => a === "info" || a === "summarize");
+const subcmdIndex = args.findIndex((a) => a === "info" || a === "summarize" || a === "config");
 if (subcmdIndex !== -1) {
   mode = args[subcmdIndex]!;
   args.splice(subcmdIndex, 1);
@@ -213,6 +216,22 @@ for (let i = 0; i < args.length; i++) {
     process.exit(1);
   } else {
     videoId = arg;
+  }
+}
+
+if (mode === "config") {
+  const path = configPath();
+  const editor = process.env.EDITOR;
+  if (editor) {
+    const proc = spawn(editor, [path], { stdio: "inherit" });
+    proc.on("exit", () => process.exit(0));
+    proc.on("error", () => {
+      console.log(`Config file: ${path}`);
+      process.exit(0);
+    });
+  } else {
+    console.log(`Config file: ${path}`);
+    process.exit(0);
   }
 }
 
