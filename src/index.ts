@@ -513,9 +513,12 @@ try {
 
     startTimer();
 
+    let cachedInfo: string | null = null;
+
     if (!noCache) {
       const cachedSegments = await readCache(dir, "transcript.json");
       const cachedMd = await readCache(dir, "transcript.md");
+      cachedInfo = await readCache(dir, "info.json");
       if (cachedSegments && cachedMd) {
         info("Transcript cached");
         debug("Cache hit:", dir);
@@ -548,6 +551,7 @@ try {
         title: result.videoDetails.title,
         channel: result.videoDetails.author,
       });
+      cachedInfo = infoJson;
       const timestampsObj: Record<string, string> = {};
       const decode = !noDecode;
       for (const seg of segments) {
@@ -564,7 +568,8 @@ try {
 
       info(`Transcript: ${segments.length} segments`);
       await writeCache(dir, "transcript.json", JSON.stringify(segments));
-      debug("Cache written: transcript.json");
+      await writeCache(dir, "info.json", infoJson);
+      debug("Cache written: transcript.json, info.json");
 
       if (!md) {
         info(`Transcribing...`);
@@ -579,8 +584,22 @@ try {
         debug("Cache written: transcript.md");
       }
     } else {
-      // Cache hit — rebuild structured content from cached segments
-      const infoJson = JSON.stringify({ title: "", channel: "" });
+      if (!cachedInfo) {
+        debug("Cache missing info.json, re-fetching video details");
+        const fallbackOpts = lang
+          ? { lang, videoDetails: true as const }
+          : { videoDetails: true as const };
+        const fallbackResult = (await fetchTranscript(videoId, fallbackOpts)) as {
+          videoDetails: VideoDetails;
+          segments: TranscriptSegment[];
+        };
+        cachedInfo = JSON.stringify({
+          title: fallbackResult.videoDetails.title,
+          channel: fallbackResult.videoDetails.author,
+        });
+        await writeCache(dir, "info.json", cachedInfo);
+        debug("Cache written: info.json");
+      }
       const timestampsObj: Record<string, string> = {};
       const decode = !noDecode;
       for (const seg of segments) {
@@ -588,7 +607,7 @@ try {
       }
       const timestampsJson = JSON.stringify(timestampsObj);
       const transcriptText = toText(segments, decode);
-      const structuredContent = `INFO:\n${infoJson}\n\nTIMESTAMPS:\n${timestampsJson}\n\nTEXT:\n${transcriptText}`;
+      const structuredContent = `INFO:\n${cachedInfo}\n\nTIMESTAMPS:\n${timestampsJson}\n\nTEXT:\n${transcriptText}`;
 
       if (!md) {
         info(`Transcribing...`);
