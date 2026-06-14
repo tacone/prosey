@@ -195,7 +195,7 @@ let pagerCmd: string | null = null;
 
 const args = process.argv.slice(2);
 
-if (args.length === 0 || args.includes("--help")) {
+if (args.length === 0 || args.includes("--help") || args.includes("help")) {
   console.log(help());
   exitProcess(0);
 }
