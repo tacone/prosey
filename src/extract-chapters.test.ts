@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { extractChapters, formatChaptersAsText } from "./extract-chapters";
+import { extractChapters, formatChaptersAsText, formatChaptersAsJson } from "./extract-chapters";
 
 describe("extractChapters", () => {
   test("extracts chapters from standard format", () => {
@@ -186,6 +186,27 @@ With no timestamps at all`;
       time: 1195,
       title: "Live Test 3: Facebook Ads on Autopilot",
     });
+  });
+});
+
+describe("formatChaptersAsJson", () => {
+  test("formats chapters as key-value JSON", () => {
+    const chapters = [
+      { time: 0, title: "Intro" },
+      { time: 90, title: "Chapter 1" },
+    ];
+    const result = JSON.parse(formatChaptersAsJson(chapters));
+    expect(result).toEqual({ "00:00": "Intro", "01:30": "Chapter 1" });
+  });
+
+  test("formats chapters with hours", () => {
+    const chapters = [{ time: 3661, title: "After 1 Hour" }];
+    const result = JSON.parse(formatChaptersAsJson(chapters));
+    expect(result).toEqual({ "01:01:01": "After 1 Hour" });
+  });
+
+  test("returns not available for empty chapters", () => {
+    expect(formatChaptersAsJson([])).toBe("not available");
   });
 });
 

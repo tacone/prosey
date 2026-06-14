@@ -38,9 +38,12 @@ Write a comprehensive summary of the following transcription.
 prompt = """
 Format the following text using markdown. Do not rephrase.
 
-Only output the formatted text without adding anything.
+- use headers
+- use the INFO section to correct spellings in the text (e.g. Pi vs Pie)
+- use the INFO Title field as the main title
+- use timestamps (if available) as second level headers
 
-TEXT:
+Only output the formatted text without adding anything.
 """
 
 # Command override for transcribe. Uncomment to use a different command

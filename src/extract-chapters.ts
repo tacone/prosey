@@ -34,6 +34,22 @@ export function extractChapters(description: string): Chapter[] {
   });
 }
 
+export function formatChaptersAsJson(chapters: Chapter[]): string {
+  if (chapters.length === 0) return "not available";
+  const obj: Record<string, string> = {};
+  for (const ch of chapters) {
+    const h = Math.floor(ch.time / 3600);
+    const m = Math.floor((ch.time % 3600) / 60);
+    const s = ch.time % 60;
+    const key =
+      h > 0
+        ? `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+        : `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    obj[key] = ch.title;
+  }
+  return JSON.stringify(obj);
+}
+
 export function formatChaptersAsText(chapters: Chapter[]): string {
   return chapters
     .map((c) => {

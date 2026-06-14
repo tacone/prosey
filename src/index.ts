@@ -18,7 +18,7 @@ import {
   resolveTranscribePrompt,
 } from "./config-resolve";
 import { cacheDir, readCache, writeCache, extractVideoId } from "./cache";
-import { extractChapters, formatChaptersAsText } from "./extract-chapters";
+import { extractChapters, formatChaptersAsText, formatChaptersAsJson } from "./extract-chapters";
 import { checkVersion } from "./version-check";
 import pkg from "../package.json";
 import prettier from "prettier";
@@ -550,16 +550,12 @@ try {
       const infoJson = JSON.stringify({
         title: result.videoDetails.title,
         channel: result.videoDetails.author,
+        description: result.videoDetails.description,
       });
       cachedInfo = infoJson;
-      const timestampsObj: Record<string, string> = {};
-      const decode = !noDecode;
-      for (const seg of segments) {
-        timestampsObj[String(seg.offset)] = decode ? decodeEntities(seg.text) : seg.text;
-      }
-      const timestampsJson = JSON.stringify(timestampsObj);
-      const transcriptText = toText(segments, decode);
-      const structuredContent = `INFO:\n${infoJson}\n\nTIMESTAMPS:\n${timestampsJson}\n\nTEXT:\n${transcriptText}`;
+      const chapterValue = formatChaptersAsJson(extractChapters(result.videoDetails.description));
+      const transcriptText = toText(segments, !noDecode);
+      const structuredContent = `INFO:\n${infoJson}\n\nTIMESTAMPS:\n${chapterValue}\n\nTEXT:\n${transcriptText}`;
 
       if (dryRun) {
         await outputText(`${prompt}\n\n${structuredContent}\n`);
@@ -569,7 +565,8 @@ try {
       info(`Transcript: ${segments.length} segments`);
       await writeCache(dir, "transcript.json", JSON.stringify(segments));
       await writeCache(dir, "info.json", infoJson);
-      debug("Cache written: transcript.json, info.json");
+      await writeCache(dir, "chapters.json", chapterValue);
+      debug("Cache written: transcript.json, info.json, chapters.json");
 
       if (!md) {
         info(`Transcribing...`);
@@ -584,6 +581,7 @@ try {
         debug("Cache written: transcript.md");
       }
     } else {
+      let chapterValue: string;
       if (!cachedInfo) {
         debug("Cache missing info.json, re-fetching video details");
         const fallbackOpts = lang
@@ -596,18 +594,20 @@ try {
         cachedInfo = JSON.stringify({
           title: fallbackResult.videoDetails.title,
           channel: fallbackResult.videoDetails.author,
+          description: fallbackResult.videoDetails.description,
         });
         await writeCache(dir, "info.json", cachedInfo);
-        debug("Cache written: info.json");
+        chapterValue = formatChaptersAsJson(
+          extractChapters(fallbackResult.videoDetails.description),
+        );
+        await writeCache(dir, "chapters.json", chapterValue);
+        debug("Cache written: info.json, chapters.json");
+      } else {
+        const cachedChapters = await readCache(dir, "chapters.json");
+        chapterValue = cachedChapters ?? "not available";
       }
-      const timestampsObj: Record<string, string> = {};
-      const decode = !noDecode;
-      for (const seg of segments) {
-        timestampsObj[String(seg.offset)] = decode ? decodeEntities(seg.text) : seg.text;
-      }
-      const timestampsJson = JSON.stringify(timestampsObj);
-      const transcriptText = toText(segments, decode);
-      const structuredContent = `INFO:\n${cachedInfo}\n\nTIMESTAMPS:\n${timestampsJson}\n\nTEXT:\n${transcriptText}`;
+      const transcriptText = toText(segments, !noDecode);
+      const structuredContent = `INFO:\n${cachedInfo}\n\nTIMESTAMPS:\n${chapterValue}\n\nTEXT:\n${transcriptText}`;
 
       if (!md) {
         info(`Transcribing...`);
