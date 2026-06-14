@@ -24,9 +24,12 @@ function stamp(): string {
   return `+${(elapsed / 1000).toFixed(1)}s`;
 }
 
+const INFO_BEFORE = "\x1b[0m\x1b[2m\x1b[1m";
+const INFO_AFTER = "\x1b[0m";
+
 export function info(...args: unknown[]): void {
   if (level === "quiet") return;
-  console.error(`[${stamp()}]`, ...args);
+  console.error(INFO_BEFORE, `[${stamp()}]`, ...args, INFO_AFTER);
 }
 
 export function debug(...args: unknown[]): void {
