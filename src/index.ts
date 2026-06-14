@@ -223,16 +223,15 @@ if (mode === "config") {
   const path = configPath();
   const editor = process.env.EDITOR;
   if (editor) {
-    const proc = spawn(editor, [path], { stdio: "inherit" });
-    proc.on("exit", () => process.exit(0));
-    proc.on("error", () => {
-      console.log(`Config file: ${path}`);
-      process.exit(0);
+    await new Promise<void>((resolve) => {
+      const proc = spawn(editor, [path], { stdio: "inherit" });
+      proc.on("exit", () => resolve());
+      proc.on("error", () => resolve());
     });
   } else {
     console.log(`Config file: ${path}`);
-    process.exit(0);
   }
+  process.exit(0);
 }
 
 if (!videoId) {
