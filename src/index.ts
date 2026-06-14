@@ -37,6 +37,7 @@ function help(): string {
   return `${NAME} v${VERSION}
 
 Usage: ${NAME} [options] <video-url-or-id>
+       ${NAME} read [options] <video-url-or-id>
        ${NAME} info [options] <video-url-or-id>
        ${NAME} summarize [options] <video-url-or-id>
        ${NAME} config
@@ -44,6 +45,7 @@ Usage: ${NAME} [options] <video-url-or-id>
 Download a YouTube video transcript or show video details.
 
 Commands:
+  read                  Download and print a transcript (default command)
   info                  Show video metadata (title, channel, duration, etc.)
   summarize             Pipe transcript to the command configured in [summarize]
   config                Open config file in \$EDITOR
@@ -211,8 +213,10 @@ if (args.includes("--reset-config")) {
 
 const config: ProseyConfig = await loadConfig().catch(() => ({}) as ProseyConfig);
 
-let mode = "transcript";
-const subcmdIndex = args.findIndex((a) => a === "info" || a === "summarize" || a === "config");
+let mode = "read";
+const subcmdIndex = args.findIndex(
+  (a) => a === "info" || a === "summarize" || a === "config" || a === "read",
+);
 if (subcmdIndex !== -1) {
   mode = args[subcmdIndex]!;
   args.splice(subcmdIndex, 1);

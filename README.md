@@ -64,12 +64,14 @@ Grab a compiled binary from the `dist/` directory (requires no runtime).
 
 ```
 prosey [options] <video-url-or-id>
+prosey read [options] <video-url-or-id>
 prosey info [options] <video-url-or-id>
 prosey summarize [options] <video-url-or-id>
 prosey config
 ```
 
-Pass a full YouTube URL or a bare video ID. The transcript is printed to
+Pass a full YouTube URL or a bare video ID. `read` is the default command, so
+`prosey <id>` is equivalent to `prosey read <id>`. The transcript is printed to
 stdout by default, with video details prepended.
 
 The `summarize` command fetches a transcript, prepends the prompt from the
