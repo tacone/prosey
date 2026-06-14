@@ -20,14 +20,16 @@ const NAME = "prosey";
 const VERSION = pkg.version;
 
 let latestVersion: string | null = null;
-
-checkVersion().then((v) => {
+const versionCheck = checkVersion().then((v) => {
   latestVersion = v;
 });
 
-function exitProcess(code: number): never {
-  if (useHints && code === 0 && latestVersion && latestVersion !== VERSION) {
-    hint(`📦 New version available: ${latestVersion}`);
+async function exitProcess(code: number): Promise<void> {
+  if (useHints && code === 0) {
+    const latest = latestVersion ?? (await versionCheck.then(() => latestVersion));
+    if (latest && latest !== VERSION) {
+      hint(`📦 New version available: ${latest}`);
+    }
   }
   process.exit(code);
 }
@@ -312,7 +314,7 @@ if (!extracted) {
   exitProcess(65);
 }
 
-videoId = extracted;
+videoId = extracted!;
 
 setLevel(logLevel);
 resetTimer();
@@ -388,14 +390,14 @@ try {
       debug("Cache written: transcript.json");
     }
 
-    const prompt = config.summarize.prompt ?? "";
+    const prompt = config.summarize!.prompt ?? "";
     const transcriptText = toText(segments, !noDecode);
 
     if (!summary) {
       info(`Summarizing...`);
       summary = await summarize({
         prompt,
-        command: config.summarize.command,
+        command: config.summarize!.command!,
         transcript: transcriptText,
         cwd: dir,
       });
