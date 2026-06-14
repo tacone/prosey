@@ -57,9 +57,9 @@ Usage: ${NAME} [options] <video-url-or-id>
 Download a YouTube video transcript or show video details.
 
 Commands:
-  read                  Download and print a transcript (default command)
+  summarize             Pipe transcript to the AI command (default command)
+  read                  Download and print a richly formatted transcript
   info                  Show video metadata (title, channel, duration, etc.)
-  summarize             Pipe transcript to the command configured in [summarize]
   config                Open config file in \$EDITOR
   help                  Show this help message
 
@@ -230,7 +230,7 @@ if (args.includes("--reset-config")) {
 
 const config: ProseyConfig = await loadConfig().catch(() => ({}) as ProseyConfig);
 
-let mode = "read";
+let mode = "summarize";
 const subcmdIndex = args.findIndex(
   (a) => a === "info" || a === "summarize" || a === "config" || a === "read",
 );
