@@ -1,0 +1,22 @@
+<svg width="100%" viewBox="0 0 680 280" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>Prosey</title>
+
+  
+  <path d="M100,545 a4,4 0 0 0-4,4 v50 a4,4 0 0 0 6,3.46 l43,-25 a4,4 0 0 0 0,-6.93 l-43,-25 a4,4 0 0 0-2,-0.53 Z" transform="translate(0,-405)" fill="#9B8BF4" opacity="0.25" style="fill:rgb(155, 139, 244);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.25;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  
+  <path d="M96,130 C96,126 99,124 102,126 L145,149 C148,151 148,155 145,157 L102,180 C99,182 96,180 96,176 Z" fill="none" stroke="#9B8BF4" stroke-width="2.5" stroke-linejoin="round" style="fill:none;stroke:rgb(155, 139, 244);color:rgb(0, 0, 0);stroke-width:2.5px;stroke-linecap:butt;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <path d="M96,130 C96,126 99,124 102,126 L145,149 C148,151 148,155 145,157 L102,180 C99,182 96,180 96,176 Z" fill="#9B8BF4" opacity="0.18" style="fill:rgb(155, 139, 244);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.18;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  
+  <path d="M162,142 L178,154 L162,166" fill="none" stroke="#9B8BF4" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" style="fill:none;stroke:rgb(155, 139, 244);color:rgb(0, 0, 0);stroke-width:2.8px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <path d="M176,142 L192,154 L176,166" fill="none" stroke="#9B8BF4" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" style="fill:none;stroke:rgb(155, 139, 244);color:rgb(0, 0, 0);stroke-width:2.8px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  
+  <rect x="212" y="138" width="140" height="12" rx="6" fill="#9B8BF4" opacity="0.85" style="fill:rgb(155, 139, 244);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.85;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <rect x="212" y="155" width="116" height="12" rx="6" fill="#9B8BF4" opacity="0.55" style="fill:rgb(155, 139, 244);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.55;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <rect x="212" y="172" width="130" height="12" rx="6" fill="#9B8BF4" opacity="0.3" style="fill:rgb(155, 139, 244);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.3;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  
+  <text x="60" y="220" font-size="28" font-weight="500" fill="var(--color-text-primary, #111)" font-family="var(--font-sans, sans-serif)" letter-spacing="-0.5px" style="fill:rgb(20, 20, 19);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, sans-serif;font-size:28px;font-weight:500;text-anchor:start;dominant-baseline:auto">prosey</text>
+
+</svg>

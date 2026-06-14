@@ -1,5 +1,9 @@
 # Prosey
 
+<p align="center">
+  <img src="assets/prosey-logo.svg" alt="Prosey logo" width="400"/>
+</p>
+
 **Prosey** is a CLI tool to download and display video transcriptions from YouTube, so you can get the information you're looking for without wasting hours.
 
 The main use cases are:
