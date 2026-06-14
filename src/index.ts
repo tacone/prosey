@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 
-import { execSync, spawn } from "node:child_process";
+import { setLevel, info, debug, startTimer, resetTimer } from "./debug";
+import type { LogLevel } from "./debug";
+import { spawn } from "node:child_process";
 import { writeFile } from "node:fs/promises";
+import { detectPager } from "./pager";
 import { fetchTranscript, listLanguages } from "youtube-transcript-plus";
 import type { CaptionTrackInfo, VideoDetails, TranscriptSegment } from "youtube-transcript-plus";
 import { formatWithTimestamps, toText, toJSON, formatDuration, decodeEntities } from "./format";
@@ -9,8 +12,6 @@ import { loadConfig, resetConfig, configPath } from "./config";
 import type { ProseyConfig } from "./config";
 import { summarize } from "./summarize";
 import { cacheDir, readCache, writeCache, extractVideoId } from "./cache";
-import { setLevel, info, debug, startTimer, resetTimer } from "./debug";
-import type { LogLevel } from "./debug";
 import pkg from "../package.json";
 import prettier from "prettier";
 
@@ -135,29 +136,6 @@ async function formatMd(text: string): Promise<string> {
   } catch {
     return text;
   }
-}
-
-function hasCommand(cmd: string): boolean {
-  try {
-    execSync(`command -v ${cmd} 2>/dev/null`, { stdio: "ignore" });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function detectPager(cfg?: ProseyConfig): string | null {
-  const env = process.env.PROSEY_PAGER;
-  if (env !== undefined && env !== "" && env !== "auto") return env;
-
-  const cfgVal = cfg?.pager;
-  if (cfgVal !== undefined && cfgVal !== "" && cfgVal !== "auto") return cfgVal;
-
-  if (hasCommand("bat")) return "bat -lmd";
-  if (hasCommand("glow")) return "glow";
-  if (hasCommand("mdcat")) return "mdcat -l -p";
-  if (hasCommand("less")) return "less";
-  return null;
 }
 
 async function outputText(text: string): Promise<void> {
@@ -317,7 +295,7 @@ videoId = extracted;
 
 setLevel(logLevel);
 resetTimer();
-pagerCmd = usePager ? detectPager(config) : null;
+pagerCmd = usePager ? detectPager(config.pager) : null;
 debug("Pager:", pagerCmd ?? "none");
 debug("Config file:", configPath());
 debug("Video ID:", videoId);
