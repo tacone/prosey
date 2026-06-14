@@ -43,6 +43,7 @@ Grab a compiled binary from the `dist/` directory (requires no runtime).
 prosey [options] <video-url-or-id>
 prosey info [options] <video-url-or-id>
 prosey summarize [options] <video-url-or-id>
+prosey config
 ```
 
 Pass a full YouTube URL or a bare video ID. The transcript is printed to
@@ -50,6 +51,9 @@ stdout by default, with video details prepended.
 
 The `summarize` command fetches a transcript, prepends the prompt from the
 `[summarize]` config section, and pipes the result to the configured command.
+
+The `config` command opens your config file in `$EDITOR` for editing. If
+`$EDITOR` is not set, the config file path is printed.
 
 ### Examples
 
@@ -80,6 +84,9 @@ npx @tacone/prosey info 771PQEDeRmw
 
 # Summarize via the configured command
 npx @tacone/prosey summarize 771PQEDeRmw
+
+# Edit config in $EDITOR
+npx @tacone/prosey config
 ```
 
 ## Options
@@ -99,6 +106,8 @@ npx @tacone/prosey summarize 771PQEDeRmw
 | `--no-format`           | Skip prettier markdown formatting on summarize output.                                                         |
 | `-q`, `--quiet`         | Suppress all stderr logging.                                                                                   |
 | `-v`, `--verbose`       | Print debug information to stderr.                                                                             |
+| `--no-pager`            | Disable pager for stdout output (auto-detected by default).                                                    |
+| `--pager`               | Use pager for stdout output (default).                                                                         |
 | `--reset-config`        | Reset config file to defaults and exit.                                                                        |
 | `--help`                | Show help message and exit.                                                                                    |
 | `--version`             | Show version number and exit.                                                                                  |
@@ -145,12 +154,26 @@ environment variable to use a custom path.
 The config file is created automatically on first run with default values.
 Use `--reset-config` to restore the defaults at any time.
 
+### `pager`
+
+Pager command for transcript and summary output. Defaults to `"auto"`, which
+detects the first available of: `bat -lmd` → `glow` → `mdcat -l -p` → `less`.
+Set to a custom command (e.g. `"less -R"`) to override. The `PROSEY_PAGER`
+environment variable takes precedence over this setting.
+
+### `[summarize]`
+
 The `[summarize]` section configures the `summarize` command:
 
 | Key       | Description                                      |
 | --------- | ------------------------------------------------ |
 | `prompt`  | Instruction prepended to the transcript          |
 | `command` | Shell command that receives the prompt via stdin |
+
+### `PROSEY_PAGER`
+
+Environment variable to set the pager command. Takes precedence over the
+`pager` config value. Set to `"auto"` or empty to use auto-detection.
 
 ## Cache
 
