@@ -1,6 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import type { TranscriptSegment } from "youtube-transcript-plus";
-import { formatTime, decodeEntities, formatWithTimestamps, toText, toJSON } from "./format";
+import {
+  formatTime,
+  formatDuration,
+  decodeEntities,
+  formatWithTimestamps,
+  toText,
+  toJSON,
+} from "./format";
 
 const segments: TranscriptSegment[] = [
   { text: "Hello world", offset: 1.5, duration: 2.0, lang: "en" },
@@ -15,6 +22,15 @@ describe("formatTime", () => {
   test("minutes and seconds", () => expect(formatTime(65)).toBe("01:05"));
   test("long duration", () => expect(formatTime(3661)).toBe("61:01"));
   test("fractional truncated", () => expect(formatTime(90.7)).toBe("01:30"));
+});
+
+describe("formatDuration", () => {
+  test("zero", () => expect(formatDuration(0)).toBe("0:00"));
+  test("seconds only", () => expect(formatDuration(45)).toBe("0:45"));
+  test("minute boundary", () => expect(formatDuration(60)).toBe("1:00"));
+  test("minutes only", () => expect(formatDuration(185)).toBe("3:05"));
+  test("hour boundary", () => expect(formatDuration(3600)).toBe("1:00:00"));
+  test("hours and minutes", () => expect(formatDuration(3661)).toBe("1:01:01"));
 });
 
 describe("decodeEntities", () => {
