@@ -9,9 +9,10 @@ import type { ProseyConfig } from "./config";
 import { summarize } from "./summarize";
 import { cacheDir, readCache, writeCache, extractVideoId } from "./cache";
 import { enableDebug, debug } from "./debug";
+import pkg from "../package.json";
 
 const NAME = "prosey";
-const VERSION = "0.1.0";
+const VERSION = pkg.version;
 
 function help(): string {
   return `${NAME} v${VERSION}
