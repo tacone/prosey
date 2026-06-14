@@ -18,6 +18,7 @@ import {
   resolveTranscribePrompt,
 } from "./config-resolve";
 import { cacheDir, readCache, writeCache, extractVideoId } from "./cache";
+import { extractChapters, formatChaptersAsText } from "./extract-chapters";
 import { checkVersion } from "./version-check";
 import pkg from "../package.json";
 import prettier from "prettier";
@@ -81,6 +82,7 @@ Options:
   --no-cache             Skip cache and overwrite cache files.
   --no-format            Skip prettier formatting.
   --dry-run              Print what would be sent to the AI command and exit.
+  --extract-timestamps   Extract chapter timestamps from video description.
   --no-pager             Disable pager for stdout output.
   --pager                Use pager for stdout output (default).
   --no-hints             Disable hints.
@@ -251,6 +253,7 @@ let noFormat = false;
 let usePager = true;
 let useHints = true;
 let dryRun = false;
+let extractTimestamps = false;
 let logLevel: LogLevel = "normal";
 
 for (let i = 0; i < args.length; i++) {
@@ -319,6 +322,8 @@ for (let i = 0; i < args.length; i++) {
     noDecode = true;
   } else if (arg === "--dry-run") {
     dryRun = true;
+  } else if (arg === "--extract-timestamps") {
+    extractTimestamps = true;
   } else if (arg.startsWith("-")) {
     console.error(`Unknown option: ${arg}`);
     exitProcess(1);
@@ -386,6 +391,25 @@ if (lang) debug("Language:", lang);
 
 // Give the version check a moment to complete
 await Promise.race([versionCheck, new Promise((r) => setTimeout(r, 1000))]);
+
+if (extractTimestamps) {
+  startTimer();
+  info("Fetching transcript...");
+  const result = (await fetchTranscript(videoId, {
+    videoDetails: true,
+    lang,
+  } as any)) as {
+    videoDetails: VideoDetails;
+    segments: TranscriptSegment[];
+  };
+  info("Transcript fetched");
+  const chapters = extractChapters(result.videoDetails.description);
+  const output = outputJson
+    ? JSON.stringify(chapters, null, 2) + "\n"
+    : formatChaptersAsText(chapters) + "\n";
+  await outputText(output);
+  exitProcess(0);
+}
 
 try {
   if (mode === "info") {
