@@ -6,14 +6,14 @@ You can read, skim, search, copy, and manipulate the text using the tools you lo
 
 ## Features
 
-| Feature                          | Description                                                                                     |
-| -------------------------------- | ----------------------------------------------------------------------------------------------- |
-| 📋&nbsp;Transcript&nbsp;download | Fetch YouTube transcripts as plain text or JSON                                                 |
-| 🤖&nbsp;AI&nbsp;summarization    | Pipe transcripts to any AI agent (opencode, Claude, Copilot, Codex)                             |
-| 🎨&nbsp;Smart&nbsp;pager         | Automatic syntax highlighting if bat, glow or mdcat are installed (or configure your own pager) |
-| 🛠️&nbsp;Customization            | Use `prosey config` to access and edit your configuration                                       |
-| 💾&nbsp;Disk&nbsp;caching        | Transcripts and summaries cached for instant repeat                                             |
-| 📄&nbsp;Supported&nbsp;formats   | Plain text and JSON                                                                             |
+| Feature                              | Description                                                                                     |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| **📋&nbsp;Transcript&nbsp;download** | Fetch YouTube transcripts as plain text or JSON                                                 |
+| **🤖&nbsp;AI&nbsp;summarization**    | Pipe transcripts to any AI agent (opencode, Claude, Copilot, Codex)                             |
+| **🎨&nbsp;Smart&nbsp;pager**         | Automatic syntax highlighting if bat, glow or mdcat are installed (or configure your own pager) |
+| **🛠️&nbsp;Customization**            | Use `prosey config` to access and edit your configuration                                       |
+| **💾&nbsp;Disk&nbsp;caching**        | Transcripts and summaries cached for instant repeat                                             |
+| **📄&nbsp;Supported&nbsp;formats**   | Plain text and JSON                                                                             |
 
 ## Quickstart
 
