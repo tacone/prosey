@@ -15,7 +15,13 @@ hints = true
 
 # Default command for AI operations (summarize, transcribe).
 # Can be overridden per-section via the command key below.
-command = "opencode run"
+
+# Examples:
+#
+#   OPENCODE_PERMISSION='{"read":"allow","write":"deny","edit":"deny","bash":"deny","glob":"deny","grep":"deny","webfetch":\"deny\",\"task\":\"deny\",\"todowrite\":\"deny\",\"websearch\":\"deny","lsp":"deny"}' opencode run --pure
+#   copilot -s --deny-all-tools --read-only
+
+command = "OPENCODE_PERMISSION='{\"read\":\"allow\",\"write\":\"deny\",\"edit\":\"deny\",\"bash\":\"deny\",\"glob\":\"deny\",\"grep\":\"deny\",\"webfetch\":\"deny\",\"task\":\"deny\",\"todowrite\":\"deny\",\"websearch\":\"deny\",\"lsp\":\"deny\"}' opencode run --pure --variant low"
 
 [summarize]
 
@@ -41,7 +47,11 @@ Format the following text using markdown. Do not rephrase.
 - use headers
 - use the INFO section to correct spellings in the text (e.g. Pi vs Pie)
 - use the INFO Title field as the main title
-- use timestamps (if available) as second level headers
+- use timestamps (if available) as second level headers (just text, no time value)
+- format the text appropriately adding paragraphs, blockquote where it applies
+- aim for max 3-5 sentences (or 350-400 chars) for paragraph on average
+- consider using bold for technical term/proper noun repeated multiple times
+- don't overthink
 
 Only output the formatted text without adding anything.
 """
