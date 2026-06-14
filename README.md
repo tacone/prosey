@@ -71,34 +71,34 @@ The `config` command opens your config file in `$EDITOR` for editing. If
 
 ```bash
 # Basic — plain text with details
-npx @tacone/prosey 771PQEDeRmw
+prosey 771PQEDeRmw
 
 # Specify language
-npx @tacone/prosey https://youtu.be/771PQEDeRmw --lang es
+prosey https://youtu.be/771PQEDeRmw --lang es
 
 # Include timestamps
-npx @tacone/prosey 771PQEDeRmw -t
+prosey 771PQEDeRmw -t
 
 # Save to file
-npx @tacone/prosey 771PQEDeRmw -o transcript.txt
+prosey 771PQEDeRmw -o transcript.txt
 
 # JSON output (timestamps always included)
-npx @tacone/prosey 771PQEDeRmw --json
+prosey 771PQEDeRmw --json
 
 # Transcript only, no video details
-npx @tacone/prosey 771PQEDeRmw --no-details
+prosey 771PQEDeRmw --no-details
 
 # List available transcript languages
-npx @tacone/prosey 771PQEDeRmw --list
+prosey 771PQEDeRmw --list
 
 # Show video metadata
-npx @tacone/prosey info 771PQEDeRmw
+prosey info 771PQEDeRmw
 
 # Summarize via the configured command
-npx @tacone/prosey summarize 771PQEDeRmw
+prosey summarize 771PQEDeRmw
 
 # Edit config in $EDITOR
-npx @tacone/prosey config
+prosey config
 ```
 
 ## Options
