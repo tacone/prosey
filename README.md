@@ -4,20 +4,32 @@
 
 You can read, skim, search, copy, and manipulate the text using the tools you love the most.
 
-## Usage
+## Quickstart
+
+Try it out immediately with npx:
 
 ```bash
 npx @tacone/prosey 771PQEDeRmw
 npx @tacone/prosey https://youtu.be/771PQEDeRmw --lang es -o transcript.txt
-npx @tacone/prosey info 771PQEDeRmw
 ```
 
 ## Install
 
-### Global install (npm)
+Install globally with your favorite package manager:
 
 ```bash
 npm install -g @tacone/prosey
+# or
+yarn global add @tacone/prosey
+# or
+pnpm add -g @tacone/prosey
+# or
+bun install -g @tacone/prosey
+```
+
+Then use it anywhere:
+
+```bash
 prosey 771PQEDeRmw
 ```
 
