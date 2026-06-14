@@ -36,7 +36,11 @@ Write a comprehensive summary of the following transcription.
 # Customize this to change how transcripts are formatted as markdown.
 
 prompt = """
-Convert this transcript to clean, readable markdown.
+Format the following text using markdown. Do not rephrase.
+
+Only output the formatted text without adding anything.
+
+TEXT:
 """
 
 # Command override for transcribe. Uncomment to use a different command

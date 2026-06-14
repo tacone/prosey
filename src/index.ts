@@ -76,6 +76,7 @@ Options:
   --reset-config         Reset config file to defaults and exit.
   --no-cache             Skip cache and overwrite cache files.
   --no-format            Skip prettier formatting.
+  --dry-run              Print what would be sent to the AI command and exit.
   --no-pager             Disable pager for stdout output.
   --pager                Use pager for stdout output (default).
   --no-hints             Disable hints.
@@ -245,6 +246,7 @@ let noCache = false;
 let noFormat = false;
 let usePager = true;
 let useHints = true;
+let dryRun = false;
 let logLevel: LogLevel = "normal";
 
 for (let i = 0; i < args.length; i++) {
@@ -311,6 +313,8 @@ for (let i = 0; i < args.length; i++) {
     logLevel = "verbose";
   } else if (arg === "--no-decode-entities") {
     noDecode = true;
+  } else if (arg === "--dry-run") {
+    dryRun = true;
   } else if (arg.startsWith("-")) {
     console.error(`Unknown option: ${arg}`);
     exitProcess(1);
@@ -438,6 +442,11 @@ try {
     }
     const transcriptText = toText(segments, !noDecode);
 
+    if (dryRun) {
+      console.log(`${prompt}\n\n${transcriptText}`);
+      exitProcess(0);
+    }
+
     if (!summary) {
       info(`Summarizing...`);
       summary = await summarize({
@@ -507,6 +516,11 @@ try {
       exitProcess(1);
     }
     const transcriptText = toText(segments, !noDecode);
+
+    if (dryRun) {
+      console.log(`${prompt}\n\n${transcriptText}`);
+      exitProcess(0);
+    }
 
     if (!md) {
       info(`Transcribing...`);

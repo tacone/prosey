@@ -1,7 +1,12 @@
 import { describe, test, expect } from "bun:test";
+import { $ } from "bun";
+import { join } from "node:path";
 
-describe("index", () => {
-  test("placeholder — fast tests live in config-resolve.test.ts and summarize.test.ts", () => {
-    expect(true).toBe(true);
+const BIN = join(import.meta.dir, "..", "bin", "prosey");
+
+describe("dry-run", () => {
+  test("is listed in help text", async () => {
+    const { stdout } = await $`${BIN} --help`.quiet();
+    expect(stdout.toString()).toContain("--dry-run");
   });
 });
