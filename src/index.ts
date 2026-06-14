@@ -528,14 +528,6 @@ try {
       debug("Cache skipped (--no-cache)");
     }
 
-    if (!segments) {
-      info("Fetching transcript...");
-      segments = lang ? await fetchTranscript(videoId, { lang }) : await fetchTranscript(videoId);
-      info(`Transcript: ${segments.length} segments`);
-      await writeCache(dir, "transcript.json", JSON.stringify(segments));
-      debug("Cache written: transcript.json");
-    }
-
     const prompt = resolveTranscribePrompt(config) ?? "";
     if (!prompt) {
       console.error(
@@ -543,24 +535,73 @@ try {
       );
       exitProcess(1);
     }
-    const transcriptText = toText(segments, !noDecode);
 
-    if (dryRun) {
-      await outputText(`${prompt}\n\n${transcriptText}\n`);
-      exitProcess(0);
-    }
-
-    if (!md) {
-      info(`Transcribing...`);
-      md = await summarize({
-        prompt,
-        command: transcribeCmd,
-        transcript: transcriptText,
-        cwd: dir,
+    if (!segments) {
+      info("Fetching transcript...");
+      const opts = lang ? { lang, videoDetails: true as const } : { videoDetails: true as const };
+      const result = (await fetchTranscript(videoId, opts)) as {
+        videoDetails: VideoDetails;
+        segments: TranscriptSegment[];
+      };
+      segments = result.segments;
+      const infoJson = JSON.stringify({
+        title: result.videoDetails.title,
+        channel: result.videoDetails.author,
       });
-      info("Transcription ready");
-      await writeCache(dir, "transcript.md", md);
-      debug("Cache written: transcript.md");
+      const timestampsObj: Record<string, string> = {};
+      const decode = !noDecode;
+      for (const seg of segments) {
+        timestampsObj[String(seg.offset)] = decode ? decodeEntities(seg.text) : seg.text;
+      }
+      const timestampsJson = JSON.stringify(timestampsObj);
+      const transcriptText = toText(segments, decode);
+      const structuredContent = `INFO:\n${infoJson}\n\nTIMESTAMPS:\n${timestampsJson}\n\nTEXT:\n${transcriptText}`;
+
+      if (dryRun) {
+        await outputText(`${prompt}\n\n${structuredContent}\n`);
+        exitProcess(0);
+      }
+
+      info(`Transcript: ${segments.length} segments`);
+      await writeCache(dir, "transcript.json", JSON.stringify(segments));
+      debug("Cache written: transcript.json");
+
+      if (!md) {
+        info(`Transcribing...`);
+        md = await summarize({
+          prompt,
+          command: transcribeCmd,
+          transcript: structuredContent,
+          cwd: dir,
+        });
+        info("Transcription ready");
+        await writeCache(dir, "transcript.md", md);
+        debug("Cache written: transcript.md");
+      }
+    } else {
+      // Cache hit — rebuild structured content from cached segments
+      const infoJson = JSON.stringify({ title: "", channel: "" });
+      const timestampsObj: Record<string, string> = {};
+      const decode = !noDecode;
+      for (const seg of segments) {
+        timestampsObj[String(seg.offset)] = decode ? decodeEntities(seg.text) : seg.text;
+      }
+      const timestampsJson = JSON.stringify(timestampsObj);
+      const transcriptText = toText(segments, decode);
+      const structuredContent = `INFO:\n${infoJson}\n\nTIMESTAMPS:\n${timestampsJson}\n\nTEXT:\n${transcriptText}`;
+
+      if (!md) {
+        info(`Transcribing...`);
+        md = await summarize({
+          prompt,
+          command: transcribeCmd,
+          transcript: structuredContent,
+          cwd: dir,
+        });
+        info("Transcription ready");
+        await writeCache(dir, "transcript.md", md);
+        debug("Cache written: transcript.md");
+      }
     }
 
     const formatted = noFormat ? md : await formatMd(md);
@@ -587,6 +628,14 @@ try {
     }
   } else {
     debug("Cache skipped (--no-cache)");
+  }
+
+  const prompt = resolveTranscribePrompt(config) ?? "";
+  if (!prompt) {
+    console.error(
+      "Error: no prompt configured. Set a prompt in the [transcribe] or [summarize] section of your config.",
+    );
+    exitProcess(1);
   }
 
   if (!segments) {
