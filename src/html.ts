@@ -32,18 +32,50 @@ export async function generateHtml(markdown: string, title?: string): Promise<st
 <title>${escapeHtml(title ?? "Prosey")}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
 ${css}
 :root {
-  --pico-font-family: 'IBM Plex Sans', sans-serif;
-  --pico-line-height: 1.82;
+  --pico-font-family: 'Plus Jakarta Sans', sans-serif;
+  --pico-font-size: 120%;
+  --pico-line-height: 1.78;
   --pico-font-weight: 300;
   --pico-blockquote-border-color: #9B8BF4;
 }
+@media (max-width: 767px) {
+  :root {
+    --pico-font-size: 110%;
+    --pico-line-height: 1.50;
+
+  }
+}
+h1 { --pico-font-size: 1.9rem; }
+h2 { --pico-font-size: 1.5rem; }
+h3 { --pico-font-size: 1.25rem; }
+h4 { --pico-font-size: 1.1rem; }
+h5 { --pico-font-size: 1rem; }
+h6 { --pico-font-size: 0.85rem; }
 h1, h2, h3, h4, h5, h6 {
   --pico-font-weight: 500;
+  --pico-line-height: 1.25;
+  margin-top: 0;
 }
+h1 {
+  letter-spacing: -0.03em;
+  margin-bottom: calc(var(--pico-typography-spacing-vertical) * 2);
+}
+li:last-child {
+  margin-bottom: 0px;
+}
+blockquote {
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--pico-muted-color);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+blockquote:first-child { margin-top: 0; }
+blockquote:last-child { margin-bottom: 0; }
 </style>
 </head>
 <body>
