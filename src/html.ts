@@ -30,7 +30,21 @@ export async function generateHtml(markdown: string, title?: string): Promise<st
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${escapeHtml(title ?? "Prosey")}</title>
-<style>${css}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+${css}
+:root {
+  --pico-font-family: 'IBM Plex Sans', sans-serif;
+  --pico-line-height: 1.82;
+  --pico-font-weight: 300;
+  --pico-blockquote-border-color: #9B8BF4;
+}
+h1, h2, h3, h4, h5, h6 {
+  --pico-font-weight: 500;
+}
+</style>
 </head>
 <body>
 <main style="max-width:720px;margin:0 auto;padding:1rem">
