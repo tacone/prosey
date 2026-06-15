@@ -43,6 +43,7 @@ export async function generateHtml(markdown: string, title?: string): Promise<st
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${escapeHtml(title ?? "Prosey")}</title>
+<script>(function(){var m=localStorage.getItem('prosey-theme'),t=m||'auto';if(t==='auto')t=window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);if(!m)localStorage.setItem('prosey-theme','auto')})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
@@ -89,13 +90,21 @@ blockquote {
 }
 blockquote:first-child { margin-top: 0; }
 blockquote:last-child { margin-bottom: 0; }
+#theme-btn:focus, #theme-btn:active { outline: none !important; }
+#theme-btn:hover, #theme-btn:focus, #theme-btn:active { opacity: 1 !important; }
 </style>
 </head>
 <body>
-<div style="padding:1rem 1rem 0"><img src="${LOGO_DATA_URI}" alt="Prosey" title="Prosey" style="vertical-align:top"></div>
+<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:1rem 1rem 0">
+<img src="${LOGO_DATA_URI}" alt="Prosey" title="Prosey" style="vertical-align:top">
+<button id="theme-btn" type="button" style="background:none;border:none;cursor:pointer;padding:0;line-height:1;opacity:.5;filter:grayscale(100%)">💡</button>
+</div>
 <main style="max-width:720px;margin:0 auto;padding:1rem">
 ${body}
 </main>
+<script>
+(function(){var b=document.getElementById('theme-btn'),modes=['auto','light','dark'],icons={auto:'\u{1F4A1}',light:'\u2600\uFE0F',dark:'\u{1F319}'};function apply(m){var t=m;if(t==='auto')t=window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);localStorage.setItem('prosey-theme',m);b.textContent=icons[m]}b.addEventListener('click',function(){var m=localStorage.getItem('prosey-theme')||'auto',i=modes.indexOf(m);apply(modes[(i+1)%modes.length])})})();
+</script>
 </body>
 </html>`;
 }

@@ -20,7 +20,6 @@ describe("generateHtml", () => {
 
   test("escapes HTML in title", async () => {
     const html = await generateHtml("hello", '<script>alert("xss")</script>');
-    expect(html).not.toContain("<script>");
-    expect(html).toContain("&lt;script&gt;");
+    expect(html).toContain("&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;");
   });
 });
