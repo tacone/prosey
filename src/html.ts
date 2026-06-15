@@ -13,6 +13,19 @@ async function getPicoCss(): Promise<string> {
   return cachedCss;
 }
 
+const LOGO_SVG = `<svg width="100" viewBox="92 120 264 68" role="img" title="Prosey" xmlns="http://www.w3.org/2000/svg">
+  <title>Prosey</title>
+  <path d="M100,545 a4,4 0 0 0-4,4 v50 a4,4 0 0 0 6,3.46 l43,-25 a4,4 0 0 0 0,-6.93 l-43,-25 a4,4 0 0 0-2,-0.53 Z" transform="translate(0,-405)" fill="#9B8BF4" opacity="0.25"/>
+  <path d="M96,130 C96,126 99,124 102,126 L145,149 C148,151 148,155 145,157 L102,180 C99,182 96,180 96,176 Z" fill="none" stroke="#9B8BF4" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M96,130 C96,126 99,124 102,126 L145,149 C148,151 148,155 145,157 L102,180 C99,182 96,180 96,176 Z" fill="#9B8BF4" opacity="0.18"/>
+  <path d="M162,142 L178,154 L162,166" fill="none" stroke="#9B8BF4" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M176,142 L192,154 L176,166" fill="none" stroke="#9B8BF4" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="212" y="138" width="140" height="12" rx="6" fill="#9B8BF4" opacity="0.85"/>
+  <rect x="212" y="155" width="116" height="12" rx="6" fill="#9B8BF4" opacity="0.55"/>
+  <rect x="212" y="172" width="130" height="12" rx="6" fill="#9B8BF4" opacity="0.3"/>
+</svg>`;
+const LOGO_DATA_URI = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(LOGO_SVG)}`;
+
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, "&amp;")
@@ -79,6 +92,7 @@ blockquote:last-child { margin-bottom: 0; }
 </style>
 </head>
 <body>
+<div style="padding:1rem 1rem 0"><img src="${LOGO_DATA_URI}" alt="Prosey" title="Prosey" style="vertical-align:top"></div>
 <main style="max-width:720px;margin:0 auto;padding:1rem">
 ${body}
 </main>
