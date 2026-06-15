@@ -33,7 +33,7 @@ export async function generateHtml(markdown: string, title?: string): Promise<st
 <style>${css}</style>
 </head>
 <body>
-<main>
+<main style="max-width:720px;margin:0 auto;padding:1rem">
 ${body}
 </main>
 </body>
