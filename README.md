@@ -59,7 +59,7 @@ Then use it anywhere:
 prosey 771PQEDeRmw
 ```
 
-### From source (development)
+### Development
 
 Uses **[Bun](https://bun.sh)** for development — scripts, package management,
 and running the TypeScript source directly.
@@ -70,10 +70,6 @@ cd prosey
 bun install
 bun run start -- 771PQEDeRmw
 ```
-
-### Prebuilt binary
-
-Grab a compiled binary from the `dist/` directory (requires no runtime).
 
 ## Usage
 
