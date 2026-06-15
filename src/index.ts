@@ -4,6 +4,7 @@ import { setLevel, info, debug, startTimer, resetTimer, hint } from "./debug";
 import type { LogLevel } from "./debug";
 import { spawn } from "node:child_process";
 import { writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { detectPager } from "./pager";
 import { fetchTranscript, listLanguages } from "youtube-transcript-plus";
 import type { CaptionTrackInfo, VideoDetails, TranscriptSegment } from "youtube-transcript-plus";
@@ -19,6 +20,7 @@ import {
 } from "./config-resolve";
 import { cacheDir, readCache, writeCache, extractVideoId } from "./cache";
 import { extractChapters, formatChaptersAsText, formatChaptersAsJson } from "./extract-chapters";
+import { generateHtml, openInBrowser } from "./html";
 import { checkVersion } from "./version-check";
 import pkg from "../package.json";
 import prettier from "prettier";
@@ -71,10 +73,11 @@ Options:
   -t, --timestamps       Include timestamps [MM:SS] in output.
   --list                 List available transcript languages and exit.
   -o, --output <path>    Write output to file instead of stdout.
-  --format <type>        Output format: markdown (default), text, or json.
+  --format <type>        Output format: markdown (default), text, json, or html.
   --json                 Shortcut for --format json.
   --text                 Shortcut for --format text.
   --markdown             Shortcut for --format markdown.
+  --html                 Shortcut for --format html (opens in browser).
   --details              Prepend video details to transcript (default, text only).
   --no-details           Suppress video details, transcript only.
   --no-decode-entities   Preserve HTML entities (decoded by default).
@@ -245,7 +248,7 @@ let timestamps = false;
 let listOnly = false;
 let outputPath: string | undefined;
 let outputJson = false;
-let format: "text" | "json" | "markdown" = "markdown";
+let format: "text" | "json" | "markdown" | "html" = "markdown";
 let noDecode = false;
 let showDetails = true;
 let noCache = false;
@@ -283,6 +286,8 @@ for (let i = 0; i < args.length; i++) {
     format = "text";
   } else if (arg === "--markdown") {
     format = "markdown";
+  } else if (arg === "--html") {
+    format = "html";
   } else if (arg === "--format") {
     const val = args[++i];
     if (val === "json") {
@@ -294,8 +299,11 @@ for (let i = 0; i < args.length; i++) {
     } else if (val === "markdown") {
       format = "markdown";
       outputJson = false;
+    } else if (val === "html") {
+      format = "html";
+      outputJson = false;
     } else {
-      console.error("Error: --format must be text, json, or markdown");
+      console.error("Error: --format must be text, json, markdown, or html");
       exitProcess(1);
     }
   } else if (arg === "--details") {
@@ -489,7 +497,21 @@ try {
     }
 
     const formatted = noFormat ? summary : await formatMd(summary);
-    await outputText(formatted + "\n");
+    if (format === "html") {
+      const htmlContent = await generateHtml(formatted);
+      const htmlPath = join(dir, "summary.html");
+      await writeFile(htmlPath, htmlContent, "utf8");
+      debug("HTML written:", htmlPath);
+      if (outputPath) {
+        await writeFile(outputPath, htmlContent, "utf8");
+      } else if (!process.stdout.isTTY) {
+        process.stdout.write(htmlContent);
+      } else {
+        await openInBrowser(htmlPath);
+      }
+    } else {
+      await outputText(formatted + "\n");
+    }
     exitProcess(0);
   } else if (listOnly) {
     const languages = await listLanguages(videoId);
@@ -497,7 +519,7 @@ try {
     exitProcess(0);
   }
 
-  if (format === "markdown") {
+  if (format === "markdown" || format === "html") {
     const transcribeCmd = resolveTranscribeCmd(config);
     if (!transcribeCmd) {
       console.error(
@@ -635,7 +657,21 @@ try {
     }
 
     const formatted = noFormat ? md : await formatMd(md);
-    await outputText(formatted + "\n");
+    if (format === "html") {
+      const htmlContent = await generateHtml(formatted);
+      const htmlPath = join(dir, "transcript.html");
+      await writeFile(htmlPath, htmlContent, "utf8");
+      debug("HTML written:", htmlPath);
+      if (outputPath) {
+        await writeFile(outputPath, htmlContent, "utf8");
+      } else if (!process.stdout.isTTY) {
+        process.stdout.write(htmlContent);
+      } else {
+        await openInBrowser(htmlPath);
+      }
+    } else {
+      await outputText(formatted + "\n");
+    }
     exitProcess(0);
   }
 

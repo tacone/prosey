@@ -59,7 +59,7 @@ Then use it anywhere:
 prosey 771PQEDeRmw
 ```
 
-### Development
+### From Source
 
 Uses **[Bun](https://bun.sh)** for development — scripts, package management,
 and running the TypeScript source directly.
@@ -101,35 +101,35 @@ The `help` command shows the help message, same as `--help`.
 ### Examples
 
 ```bash
-# Run the AI summarizer (default command)
+# Summarize (AI summary + formatting + syntax highlighting)
 prosey 771PQEDeRmw
 
-# Download a plain transcript with details
+# Summarize (same as above)
+prosey summarize 771PQEDeRmw
+
+# Transcribe (AI summary + formatting + syntax highlighting)
 prosey read 771PQEDeRmw
-
-# Specify language
-prosey read https://youtu.be/771PQEDeRmw --lang es
-
-# Include timestamps
-prosey read 771PQEDeRmw -t
-
-# Save transcript to file
-prosey read 771PQEDeRmw -o transcript.txt
-
-# JSON output (timestamps always included)
-prosey read 771PQEDeRmw --json
-
-# Transcript only, no video details
-prosey read 771PQEDeRmw --no-details
-
-# List available transcript languages
-prosey read 771PQEDeRmw --list
 
 # Show video metadata
 prosey info 771PQEDeRmw
 
 # Edit config in $EDITOR
 prosey config
+
+# List available languages
+prosey read https://youtu.be/771PQEDeRmw --list
+
+# Specify language
+prosey read https://youtu.be/771PQEDeRmw --lang es
+
+# Display JSON (no AI transcription)
+prosey read 771PQEDeRmw
+
+# Display plain text (no AI transcription)
+prosey read 771PQEDeRmw
+
+# Save transcript to file
+prosey read 771PQEDeRmw -o transcript.txt
 ```
 
 ## Options
