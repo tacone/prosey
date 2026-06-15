@@ -90,14 +90,17 @@ blockquote {
 }
 blockquote:first-child { margin-top: 0; }
 blockquote:last-child { margin-bottom: 0; }
+* { transition: all 0.3s; }
 #theme-btn:focus, #theme-btn:active { outline: none !important; }
 #theme-btn:hover, #theme-btn:focus, #theme-btn:active { opacity: 1 !important; }
+img[alt="Prosey"] { filter: grayscale(100%); }
+img[alt="Prosey"]:hover, img[alt="Prosey"]:active, img[alt="Prosey"]:focus { filter: grayscale(0%); }
 </style>
 </head>
 <body>
 <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:1rem 1rem 0">
 <img src="${LOGO_DATA_URI}" alt="Prosey" title="Prosey" style="vertical-align:top">
-<button id="theme-btn" type="button" style="background:none;border:none;cursor:pointer;padding:0;line-height:1;opacity:.5;filter:grayscale(100%)">💡</button>
+<button id="theme-btn" type="button" style="background:none;border:none;cursor:pointer;padding:0;line-height:1;opacity:.5;filter:grayscale(100%);transition:all 0.3s">💡</button>
 </div>
 <main style="max-width:720px;margin:0 auto;padding:1rem">
 ${body}
