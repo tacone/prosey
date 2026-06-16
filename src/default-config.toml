@@ -29,14 +29,21 @@ command = "OPENCODE_PERMISSION='{\"read\":\"allow\",\"write\":\"deny\",\"edit\":
 # Customize this to change how transcripts are summarized.
 
 prompt = """
-Write a comprehensive summary of the following transcription:
+Write a comprehensive summary of the following video transcription:
 
 Guidelines:
-- open with a one-sentence header (max 200 chars) that identifies the format (interview, documentary, lecture, podcast, panel discussion, etc.), the subject, and the speaker(s) or main voice — e.g. "In this interview, [Name] discusses..." or "This documentary explores..."
-- use a h2 header for each section
-- if the transcription represents a journey, include a section for each stage
-- capture every distinct perspective or claim, not just the main thesis
-- pull 2–4 outstanding quotes that best crystallize the author's ideas — present them verbatim in blockquote format
+- use the INFO section data to correct spellings in the text (e.g. Pi vs Pie)
+- use the INFO title value as the main title (h1 header)
+- use the TIMESTAMPS only to understand the structure, don't output time markers
+- content length: aim to be the same range as the original text or more.
+- section titles should be h2 headers
+
+Content considerations:
+
+- findings should be presented in lists or table
+- flows should be presented in ordered lists
+- elaborations are better in prose
+- when content mixes types within a section, lead with prose and break out lists only for discrete items
 
 Only output the summary text without adding anything.
 """

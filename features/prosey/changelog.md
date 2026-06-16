@@ -60,3 +60,39 @@ Workstation: xoxo | Workspace: prosey
 Workstation: xoxo | Workspace: prosey
 
 Created feature skeleton and wrote spec document.
+
+## 2026-06-16 — v0.3.0 — HTML output + Pairing G typography
+
+Workstation: xoxo | Workspace: prosey
+
+- Added `--format html` / `--html` flag with PicoCSS classless CSS (fetched at runtime)
+- Added Pairing G typography (IBM Plex Sans via Google Fonts)
+- Browser auto-open on TTY, stdout on pipe, file write with `-o`
+- README restructured: logo, quickstart, feature table
+- Logo SVG cleaned and straightened
+
+## 2026-06-16 — v0.4.0 — Pairing E + theme switcher + logo
+
+- Switched to Pairing E (Plus Jakarta Sans, scaled sizes)
+- Responsive font-size: 120% desktop / 110% mobile
+- Prosey logo inlined as data URI `<img>` in generated HTML
+- Dark/light/auto theme switcher with localStorage persistence
+- Three-state cycle: system-aware auto → light → dark
+- Context-aware cycling (order depends on `prefers-color-scheme`)
+- Logo grayscale by default, restores color on hover
+- `transition: all 0.3s` for smooth state changes
+
+## 2026-06-16 — v0.5.0 — polish
+
+- Theme button: no border, background, box-shadow, or outline
+- Improved summarize prompt with structural guidelines
+- Theme button syncs icon on page load
+
+## 2026-06-16 — v0.6.0 — structured AI input for summarize
+
+- `prosey summarize` now feeds the same structured content as `prosey read`:
+  `INFO:\n{title, channel, truncated description}\n\nTEXT:\n<transcript>`
+- TIMESTAMPS excluded from summarize input (chapters still cached for other uses)
+- Video details fetched with `videoDetails: true` in summarize path
+- `info.json` and `chapters.json` cached alongside transcript in summarize mode
+- `--dry-run` works with the new structured content

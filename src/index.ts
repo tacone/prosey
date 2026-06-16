@@ -443,12 +443,14 @@ try {
     const dir = cacheDir(videoId, cacheOpts);
     let segments: TranscriptSegment[] | null = null;
     let summary: string | null = null;
+    let cachedInfo: string | null = null;
 
     startTimer();
 
     if (!noCache) {
       const cachedSegments = await readCache(dir, "transcript.json");
       const cachedSummary = await readCache(dir, "summary.md");
+      cachedInfo = await readCache(dir, "info.json");
       if (cachedSegments && cachedSummary) {
         info("Transcript cached");
         debug("Cache hit:", dir);
@@ -461,14 +463,6 @@ try {
       debug("Cache skipped (--no-cache)");
     }
 
-    if (!segments) {
-      info("Fetching transcript...");
-      segments = lang ? await fetchTranscript(videoId, { lang }) : await fetchTranscript(videoId);
-      info(`Transcript: ${segments.length} segments`);
-      await writeCache(dir, "transcript.json", JSON.stringify(segments));
-      debug("Cache written: transcript.json");
-    }
-
     const prompt = resolveSummarizePrompt(config) ?? "";
     if (!prompt) {
       console.error(
@@ -476,10 +470,80 @@ try {
       );
       exitProcess(1);
     }
-    const transcriptText = toText(segments, !noDecode);
+
+    let structuredContent: string;
+
+    if (!segments) {
+      info("Fetching transcript...");
+      const opts = lang ? { lang, videoDetails: true as const } : { videoDetails: true as const };
+      const result = (await fetchTranscript(videoId, opts)) as {
+        videoDetails: VideoDetails;
+        segments: TranscriptSegment[];
+      };
+      segments = result.segments;
+      const infoJson = JSON.stringify({
+        title: result.videoDetails.title,
+        channel: result.videoDetails.author,
+        description: result.videoDetails.description,
+      });
+      cachedInfo = infoJson;
+      const chapterValue = formatChaptersAsJson(extractChapters(result.videoDetails.description));
+      const truncatedInfo = JSON.stringify({
+        title: result.videoDetails.title,
+        channel: result.videoDetails.author,
+        description: result.videoDetails.description.slice(0, 1000),
+      });
+      const transcriptText = toText(segments, !noDecode);
+      structuredContent = `INFO:\n${truncatedInfo}\n\nTEXT:\n${transcriptText}`;
+
+      if (dryRun) {
+        await outputText(`${prompt}\n\n${structuredContent}\n`);
+        exitProcess(0);
+      }
+
+      info(`Transcript: ${segments.length} segments`);
+      await writeCache(dir, "transcript.json", JSON.stringify(segments));
+      await writeCache(dir, "info.json", infoJson);
+      await writeCache(dir, "chapters.json", chapterValue);
+      debug("Cache written: transcript.json, info.json, chapters.json");
+    } else {
+      let chapterValue: string;
+      if (!cachedInfo) {
+        debug("Cache missing info.json, re-fetching video details");
+        const fallbackOpts = lang
+          ? { lang, videoDetails: true as const }
+          : { videoDetails: true as const };
+        const fallbackResult = (await fetchTranscript(videoId, fallbackOpts)) as {
+          videoDetails: VideoDetails;
+          segments: TranscriptSegment[];
+        };
+        cachedInfo = JSON.stringify({
+          title: fallbackResult.videoDetails.title,
+          channel: fallbackResult.videoDetails.author,
+          description: fallbackResult.videoDetails.description,
+        });
+        await writeCache(dir, "info.json", cachedInfo);
+        chapterValue = formatChaptersAsJson(
+          extractChapters(fallbackResult.videoDetails.description),
+        );
+        await writeCache(dir, "chapters.json", chapterValue);
+        debug("Cache written: info.json, chapters.json");
+      } else {
+        const cachedChapters = await readCache(dir, "chapters.json");
+        chapterValue = cachedChapters ?? "not available";
+      }
+      const transcriptText = toText(segments, !noDecode);
+      const cachedInfoObj = JSON.parse(cachedInfo);
+      const truncatedInfo = JSON.stringify({
+        title: cachedInfoObj.title,
+        channel: cachedInfoObj.channel,
+        description: cachedInfoObj.description.slice(0, 1000),
+      });
+      structuredContent = `INFO:\n${truncatedInfo}\n\nTEXT:\n${transcriptText}`;
+    }
 
     if (dryRun) {
-      await outputText(`${prompt}\n\n${transcriptText}\n`);
+      await outputText(`${prompt}\n\n${structuredContent}\n`);
       exitProcess(0);
     }
 
@@ -488,7 +552,7 @@ try {
       summary = await summarize({
         prompt,
         command: sumCmd,
-        transcript: transcriptText,
+        transcript: structuredContent,
         cwd: dir,
       });
       info("Summary ready");
