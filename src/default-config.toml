@@ -29,7 +29,16 @@ command = "OPENCODE_PERMISSION='{\"read\":\"allow\",\"write\":\"deny\",\"edit\":
 # Customize this to change how transcripts are summarized.
 
 prompt = """
-Write a comprehensive summary of the following transcription.
+Write a comprehensive summary of the following transcription:
+
+Guidelines:
+- open with a one-sentence header (max 200 chars) that identifies the format (interview, documentary, lecture, podcast, panel discussion, etc.), the subject, and the speaker(s) or main voice — e.g. "In this interview, [Name] discusses..." or "This documentary explores..."
+- use a h2 header for each section
+- if the transcription represents a journey, include a section for each stage
+- capture every distinct perspective or claim, not just the main thesis
+- pull 2–4 outstanding quotes that best crystallize the author's ideas — present them verbatim in blockquote format
+
+Only output the summary text without adding anything.
 """
 
 # Command override for summarize. Uncomment to use a different command
