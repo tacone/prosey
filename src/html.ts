@@ -103,7 +103,7 @@ img[alt="Prosey"]:hover, img[alt="Prosey"]:active, img[alt="Prosey"]:focus { fil
 <img src="${LOGO_DATA_URI}" alt="Prosey" title="Prosey" style="vertical-align:top">
 <button id="theme-btn" type="button" style="background:none;border:none;cursor:pointer;padding:0;line-height:1;opacity:.5;filter:grayscale(100%);transition:all 0.3s">💡</button>
 </div>
-<main style="max-width:720px;margin:0 auto;padding:1rem">
+<main style="max-width:50em;margin:0 auto;padding:1rem">
 ${body}
 </main>
 <script>
