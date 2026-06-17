@@ -472,6 +472,7 @@ try {
     }
 
     let structuredContent: string;
+    let videoTitle: string | undefined;
 
     if (!segments) {
       info("Fetching transcript...");
@@ -488,6 +489,7 @@ try {
       });
       cachedInfo = infoJson;
       const chapterValue = formatChaptersAsJson(extractChapters(result.videoDetails.description));
+      videoTitle = result.videoDetails.title;
       const truncatedInfo = JSON.stringify({
         title: result.videoDetails.title,
         channel: result.videoDetails.author,
@@ -534,6 +536,7 @@ try {
       }
       const transcriptText = toText(segments, !noDecode);
       const cachedInfoObj = JSON.parse(cachedInfo);
+      videoTitle = cachedInfoObj.title;
       const truncatedInfo = JSON.stringify({
         title: cachedInfoObj.title,
         channel: cachedInfoObj.channel,
@@ -562,7 +565,7 @@ try {
 
     const formatted = noFormat ? summary : await formatMd(summary);
     if (format === "html") {
-      const htmlContent = await generateHtml(formatted);
+      const htmlContent = await generateHtml(formatted, videoTitle);
       const htmlPath = join(dir, "summary.html");
       await writeFile(htmlPath, htmlContent, "utf8");
       debug("HTML written:", htmlPath);
@@ -596,6 +599,7 @@ try {
     const dir = cacheDir(videoId, cacheOpts);
     let segments: TranscriptSegment[] | null = null;
     let md: string | null = null;
+    let videoTitle: string | undefined;
 
     startTimer();
 
@@ -639,6 +643,7 @@ try {
         description: result.videoDetails.description,
       });
       cachedInfo = infoJson;
+      videoTitle = result.videoDetails.title;
       const chapterValue = formatChaptersAsJson(extractChapters(result.videoDetails.description));
       const truncatedInfo = JSON.stringify({
         title: result.videoDetails.title,
@@ -699,6 +704,7 @@ try {
       }
       const transcriptText = toText(segments, !noDecode);
       const cachedInfoObj = JSON.parse(cachedInfo);
+      videoTitle = cachedInfoObj.title;
       const truncatedInfo = JSON.stringify({
         title: cachedInfoObj.title,
         channel: cachedInfoObj.channel,
@@ -722,7 +728,7 @@ try {
 
     const formatted = noFormat ? md : await formatMd(md);
     if (format === "html") {
-      const htmlContent = await generateHtml(formatted);
+      const htmlContent = await generateHtml(formatted, videoTitle);
       const htmlPath = join(dir, "transcript.html");
       await writeFile(htmlPath, htmlContent, "utf8");
       debug("HTML written:", htmlPath);
