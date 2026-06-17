@@ -5,7 +5,7 @@ describe("generateHtml", () => {
   test("wraps markdown in HTML with PicoCSS", async () => {
     const html = await generateHtml("# Hello\n\nWorld", "Test");
     expect(html).toStartWith("<!DOCTYPE html>");
-    expect(html).toContain("<title>Test</title>");
+    expect(html).toContain("<title>Test - Prosey</title>");
     expect(html).toContain("<style>");
     expect(html).toContain("--pico-");
     expect(html).toContain("<h1>Hello</h1>");

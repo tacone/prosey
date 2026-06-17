@@ -42,7 +42,7 @@ export async function generateHtml(markdown: string, title?: string): Promise<st
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${escapeHtml(title ?? "Prosey")}</title>
+<title>${title ? escapeHtml(title) + " - Prosey" : "Prosey"}</title>
 <script>(function(){var m=localStorage.getItem('prosey-theme'),t=m||'auto';if(t==='auto')t=window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);if(!m)localStorage.setItem('prosey-theme','auto')})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
