@@ -8,7 +8,14 @@ import { join } from "node:path";
 import { detectPager } from "./pager";
 import { fetchTranscript, listLanguages } from "youtube-transcript-plus";
 import type { CaptionTrackInfo, VideoDetails, TranscriptSegment } from "youtube-transcript-plus";
-import { formatWithTimestamps, toText, toJSON, formatDuration, decodeEntities } from "./format";
+import {
+  formatWithTimestamps,
+  toText,
+  toJSON,
+  formatDuration,
+  formatReadableDuration,
+  decodeEntities,
+} from "./format";
 import { loadConfig, resetConfig, configPath } from "./config";
 import type { ProseyConfig } from "./config";
 import { summarize } from "./summarize";
@@ -175,6 +182,13 @@ async function formatMd(text: string): Promise<string> {
   } catch {
     return text;
   }
+}
+
+function metadataHtml(duration: number, wordCount: number, videoId: string): string {
+  const readTime = Math.ceil(wordCount / 200);
+  const sourceUrl = `https://youtube.com/watch?v=${videoId}`;
+  const dur = formatReadableDuration(duration);
+  return `<p style="font-size:0.85rem;color:var(--pico-muted-color);font-weight:300;margin-top:-0.75rem;margin-bottom:2rem"><a href="${sourceUrl}" style="text-decoration:none;color:inherit">↗ youtube.com</a> · ${dur} — ${readTime} min read</p>`;
 }
 
 async function outputText(text: string): Promise<void> {
@@ -473,6 +487,7 @@ try {
 
     let structuredContent: string;
     let videoTitle: string | undefined;
+    let videoDuration = 0;
 
     if (!segments) {
       info("Fetching transcript...");
@@ -482,10 +497,12 @@ try {
         segments: TranscriptSegment[];
       };
       segments = result.segments;
+      videoDuration = result.videoDetails.lengthSeconds;
       const infoJson = JSON.stringify({
         title: result.videoDetails.title,
         channel: result.videoDetails.author,
         description: result.videoDetails.description,
+        duration: videoDuration,
       });
       cachedInfo = infoJson;
       const chapterValue = formatChaptersAsJson(extractChapters(result.videoDetails.description));
@@ -519,10 +536,12 @@ try {
           videoDetails: VideoDetails;
           segments: TranscriptSegment[];
         };
+        videoDuration = fallbackResult.videoDetails.lengthSeconds;
         cachedInfo = JSON.stringify({
           title: fallbackResult.videoDetails.title,
           channel: fallbackResult.videoDetails.author,
           description: fallbackResult.videoDetails.description,
+          duration: videoDuration,
         });
         await writeCache(dir, "info.json", cachedInfo);
         chapterValue = formatChaptersAsJson(
@@ -537,6 +556,7 @@ try {
       const transcriptText = toText(segments, !noDecode);
       const cachedInfoObj = JSON.parse(cachedInfo);
       videoTitle = cachedInfoObj.title;
+      videoDuration = cachedInfoObj.duration ?? 0;
       const truncatedInfo = JSON.stringify({
         title: cachedInfoObj.title,
         channel: cachedInfoObj.channel,
@@ -565,7 +585,10 @@ try {
 
     const formatted = noFormat ? summary : await formatMd(summary);
     if (format === "html") {
-      const htmlContent = await generateHtml(formatted, videoTitle);
+      const wordCount = summary!.split(/\s+/).filter(Boolean).length;
+      const meta = metadataHtml(videoDuration, wordCount, videoId);
+      const withMeta = formatted.replace(/^(# .+)$/m, `$1\n\n${meta}`);
+      const htmlContent = await generateHtml(withMeta, videoTitle);
       const htmlPath = join(dir, "summary.html");
       await writeFile(htmlPath, htmlContent, "utf8");
       debug("HTML written:", htmlPath);
@@ -600,6 +623,7 @@ try {
     let segments: TranscriptSegment[] | null = null;
     let md: string | null = null;
     let videoTitle: string | undefined;
+    let videoDuration = 0;
 
     startTimer();
 
@@ -637,10 +661,12 @@ try {
         segments: TranscriptSegment[];
       };
       segments = result.segments;
+      videoDuration = result.videoDetails.lengthSeconds;
       const infoJson = JSON.stringify({
         title: result.videoDetails.title,
         channel: result.videoDetails.author,
         description: result.videoDetails.description,
+        duration: videoDuration,
       });
       cachedInfo = infoJson;
       videoTitle = result.videoDetails.title;
@@ -687,10 +713,12 @@ try {
           videoDetails: VideoDetails;
           segments: TranscriptSegment[];
         };
+        videoDuration = fallbackResult.videoDetails.lengthSeconds;
         cachedInfo = JSON.stringify({
           title: fallbackResult.videoDetails.title,
           channel: fallbackResult.videoDetails.author,
           description: fallbackResult.videoDetails.description,
+          duration: videoDuration,
         });
         await writeCache(dir, "info.json", cachedInfo);
         chapterValue = formatChaptersAsJson(
@@ -705,6 +733,7 @@ try {
       const transcriptText = toText(segments, !noDecode);
       const cachedInfoObj = JSON.parse(cachedInfo);
       videoTitle = cachedInfoObj.title;
+      videoDuration = cachedInfoObj.duration ?? 0;
       const truncatedInfo = JSON.stringify({
         title: cachedInfoObj.title,
         channel: cachedInfoObj.channel,
@@ -728,7 +757,10 @@ try {
 
     const formatted = noFormat ? md : await formatMd(md);
     if (format === "html") {
-      const htmlContent = await generateHtml(formatted, videoTitle);
+      const wordCount = md!.split(/\s+/).filter(Boolean).length;
+      const meta = metadataHtml(videoDuration, wordCount, videoId);
+      const withMeta = formatted.replace(/^(# .+)$/m, `$1\n\n${meta}`);
+      const htmlContent = await generateHtml(withMeta, videoTitle);
       const htmlPath = join(dir, "transcript.html");
       await writeFile(htmlPath, htmlContent, "utf8");
       debug("HTML written:", htmlPath);
