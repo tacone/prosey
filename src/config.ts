@@ -21,47 +21,6 @@ export interface ProseyConfig {
   };
 }
 
-const FALLBACK_CONFIG_TOML = `# Default prosey configuration
-# Created automatically on first run. Edit as needed.
-
-# Pager command for transcript and summary output.
-# Defaults to "auto": bat -lmd --style plain → glow -p → mdcat -l -p → less
-# Set to a custom command (e.g. "less -R") to override.
-# Can also be set via the PROSEY_PAGER env var (takes precedence).
-pager = "auto"
-
-# Show hints for missing tools (e.g. markdown highlighter).
-# Can also be set via PROSEY_HINTS env var (yes, no, 1, 0, true, false).
-hints = true
-
-[ai]
-# Default command for AI operations (summarize, transcribe).
-# Can be overridden per-section via the command key below.
-command = "opencode run"
-
-[summarize]
-# Prompt sent to the command via stdin.
-# Customize this to change how transcripts are summarized.
-prompt = """
-Write a comprehensive summary of the following transcription.
-"""
-
-# Command override for summarize. Uncomment to use a different command
-# than the one specified in [ai].
-# command = "opencode run"
-
-[transcribe]
-# Prompt sent to the command via stdin.
-# Customize this to change how transcripts are formatted as markdown.
-prompt = """
-Convert this transcript to clean, readable markdown.
-"""
-
-# Command override for transcribe. Uncomment to use a different command
-# than the one specified in [ai].
-# command = "opencode run"
-`;
-
 async function readDefaultConfig(): Promise<string> {
   const paths = [
     join(dirname(fileURLToPath(import.meta.url)), "default-config.toml"),
@@ -70,7 +29,7 @@ async function readDefaultConfig(): Promise<string> {
   for (const p of paths) {
     if (existsSync(p)) return readFile(p, "utf8");
   }
-  return FALLBACK_CONFIG_TOML;
+  throw new Error("default-config.toml not found");
 }
 
 function configDir(): string {
