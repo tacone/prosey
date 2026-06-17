@@ -188,7 +188,7 @@ function metadataHtml(duration: number, wordCount: number, videoId: string): str
   const readTime = Math.ceil(wordCount / 200);
   const sourceUrl = `https://youtube.com/watch?v=${videoId}`;
   const dur = formatReadableDuration(duration);
-  return `<p style="font-size:0.85rem;color:var(--pico-muted-color);font-weight:300;margin-top:-0.75rem;margin-bottom:2rem"><a href="${sourceUrl}" style="text-decoration:none;color:inherit">↗ youtube.com</a> · ${dur} — ${readTime} min read</p>`;
+  return `<p style="font-size:0.85rem;color:var(--pico-muted-color);font-weight:300;margin-top:-0.75rem;margin-bottom:2rem"><a href="${sourceUrl}" class="prosey-meta-link">↗ youtube.com</a> · ${dur} — ${readTime} min read</p>`;
 }
 
 async function outputText(text: string): Promise<void> {

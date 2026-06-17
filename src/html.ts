@@ -96,6 +96,8 @@ blockquote:last-child { margin-bottom: 0; }
 #theme-btn:hover, #theme-btn:focus, #theme-btn:active { opacity: 1 !important; }
 img[alt="Prosey"] { filter: grayscale(100%); }
 img[alt="Prosey"]:hover, img[alt="Prosey"]:active, img[alt="Prosey"]:focus { filter: grayscale(0%); }
+.prosey-meta-link { color: inherit; text-decoration: none; }
+.prosey-meta-link:hover { text-decoration: underline; text-decoration-color: inherit; }
 </style>
 </head>
 <body>
