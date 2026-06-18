@@ -34,7 +34,21 @@ function escapeHtml(text: string): string {
     .replace(/"/g, "&quot;");
 }
 
-export async function generateHtml(markdown: string, title?: string): Promise<string> {
+function watchMetaHtml(duration: number, wordCount: number, videoId: string): string {
+  const h = Math.floor(duration / 3600);
+  const m = Math.round((duration % 3600) / 60);
+  const durStr = h > 0 ? `${h} h ${m} min` : `${m} min`;
+  const readTime = Math.ceil(wordCount / 200);
+  const url = `https://youtube.com/watch?v=${videoId}`;
+  const separator = '<span style="opacity: 0.4">&nbsp;&nbsp;|&nbsp;&nbsp;</span>';
+  return `<a href="${url}" class="watch-link">${durStr} watch</a> ${separator} ${readTime} min read`;
+}
+
+export async function generateHtml(
+  markdown: string,
+  title?: string,
+  watchMeta?: { videoId: string; duration: number; wordCount: number },
+): Promise<string> {
   const [css, body] = await Promise.all([getPicoCss(), marked.parse(markdown)]);
 
   return `<!DOCTYPE html>
@@ -96,14 +110,15 @@ blockquote:last-child { margin-bottom: 0; }
 #theme-btn:hover, #theme-btn:focus, #theme-btn:active { opacity: 1 !important; }
 img[alt="Prosey"] { filter: grayscale(100%); }
 img[alt="Prosey"]:hover, img[alt="Prosey"]:active, img[alt="Prosey"]:focus { filter: grayscale(0%); }
-.prosey-meta-link { color: inherit; text-decoration: none; }
-.prosey-meta-link:hover { text-decoration: underline; text-decoration-color: inherit; }
+.watch-link { color: inherit; text-decoration: none; }
+.watch-link:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
-<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:1rem 1rem 0">
-<img src="${LOGO_DATA_URI}" alt="Prosey" title="Prosey" style="vertical-align:top">
-<button id="theme-btn" type="button" style="background:none;border:none;cursor:pointer;padding:0;line-height:1;opacity:.5;filter:grayscale(100%);transition:all 0.3s">💡</button>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1rem 0">
+<img src="${LOGO_DATA_URI}" alt="Prosey" title="Prosey" style="vertical-align:top;flex-shrink:0">
+<div style="flex:1;text-align:center;font-size:.85rem;color:var(--pico-muted-color)">${watchMeta ? watchMetaHtml(watchMeta.duration, watchMeta.wordCount, watchMeta.videoId) : ""}</div>
+<button id="theme-btn" type="button" style="background:none;border:none;cursor:pointer;padding:0;line-height:1;opacity:.5;filter:grayscale(100%);transition:all 0.3s;flex-shrink:0">💡</button>
 </div>
 <main style="max-width:50em;margin:0 auto;padding:1rem">
 ${body}

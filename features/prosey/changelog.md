@@ -88,6 +88,14 @@ Workstation: xoxo | Workspace: prosey
 - Improved summarize prompt with structural guidelines
 - Theme button syncs icon on page load
 
+## 2026-06-18 — v0.7.0 — watch/read metadata in header
+
+- Added centered watch time + read time metadata line in HTML header: `Xh Ymin watch — N min read`
+- "watch" links to the YouTube video with hover underline in muted color
+- Track duration stored in `info.json` cache for both summarize and read paths
+- Metadata removed from markdown body (now rendered by HTML template)
+- Version bump
+
 ## 2026-06-16 — v0.6.0 — structured AI input for summarize
 
 - `prosey summarize` now feeds the same structured content as `prosey read`:
