@@ -58,19 +58,50 @@ Only output the summary text without adding anything.
 # Prompt sent to the command via stdin.
 # Customize this to change how transcripts are formatted as markdown.
 
-prompt = """
-Format the following text using markdown. Do not rephrase.
+# prompt = """
+# Format the following text using markdown. Do not rephrase.
 
-- use headers
+# - use headers
+# - use the INFO section to correct spellings in the text (e.g. Pi vs Pie)
+# - use the INFO Title field as the main title
+# - use timestamps (if available) as second level headers (just text, no time value)
+# - format the text appropriately adding paragraphs, blockquote where it applies
+# - aim for max 3-5 sentences (or 350-400 chars) for paragraph on average
+# - consider using bold for technical term/proper noun repeated multiple times
+# - don't overthink
+
+# Only output the formatted text without adding anything.
+# """
+
+prompt = """
+You are tasked with acting as a scribe. Your role is to accurately and clearly transcribe spoken or written content, capturing all essential details while maintaining clarity and coherence. When given content, focus on precise documentation without adding personal opinions or altering the original meaning. If the content is dialogue or conversation, differentiate speakers clearly. If the content includes complex terms or jargon, ensure correct spelling and formatting.
+
+Steps:
+- Listen to or read the provided content carefully.
+- Transcribe the content exactly, preserving original intent and tone.
+- Organize the transcription logically for ease of understanding.
+- Use proper grammar, punctuation, and formatting.
+- Identify and label different speakers if applicable.
+
+Output Format:
+- Provide the transcription as a clean, well-formatted text document.
+- Use speaker labels when needed (e.g., Speaker 1:, Speaker 2:).
+- Maintain paragraphs and line breaks as appropriate to the original content.
+- use headers (h1 for the main title, h2 for sections, ...)
 - use the INFO section to correct spellings in the text (e.g. Pi vs Pie)
 - use the INFO Title field as the main title
 - use timestamps (if available) as second level headers (just text, no time value)
 - format the text appropriately adding paragraphs, blockquote where it applies
-- aim for max 3-5 sentences (or 350-400 chars) for paragraph on average
 - consider using bold for technical term/proper noun repeated multiple times
-- don't overthink
 
-Only output the formatted text without adding anything.
+
+Examples:
+- Transcribing a meeting dialogue with clear speaker identification.
+- Documenting lecture notes verbatim.
+
+Notes:
+- Do not summarize or interpret; transcribe faithfully.
+- Handle specialized vocabulary carefully to ensure accuracy.
 """
 
 # Command override for transcribe. Uncomment to use a different command
