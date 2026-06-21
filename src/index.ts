@@ -249,6 +249,7 @@ let listOnly = false;
 let outputPath: string | undefined;
 let outputJson = false;
 let format: "text" | "json" | "markdown" | "html" = "markdown";
+let formatExplicit = false;
 let noDecode = false;
 let showDetails = true;
 let noCache = false;
@@ -281,14 +282,19 @@ for (let i = 0; i < args.length; i++) {
   } else if (arg === "--json") {
     outputJson = true;
     format = "json";
+    formatExplicit = true;
   } else if (arg === "--text") {
     outputJson = false;
     format = "text";
+    formatExplicit = true;
   } else if (arg === "--markdown") {
     format = "markdown";
+    formatExplicit = true;
   } else if (arg === "--html") {
     format = "html";
+    formatExplicit = true;
   } else if (arg === "--format") {
+    formatExplicit = true;
     const val = args[++i];
     if (val === "json") {
       format = "json";
@@ -382,6 +388,10 @@ debug("Pager:", pagerCmd ?? "none");
   } else if (config.hints !== undefined) {
     useHints = config.hints;
   }
+}
+
+if (!formatExplicit && config.format) {
+  format = config.format as "text" | "json" | "markdown" | "html";
 }
 
 if (useHints) {
