@@ -41,7 +41,7 @@ Guidelines:
 - use the TIMESTAMPS only to understand the structure, don't output time markers
 - content length: aim to be the same range as the original text or more.
 - section titles should be h2 headers
-- paragraph length soft-limit. 250 characters
+- paragraph length: soft-limit 250 characters, hard-limit 350 characters.
 
 Content considerations:
 
