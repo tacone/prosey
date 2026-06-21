@@ -80,7 +80,7 @@ ${css}
 main.content {
   max-width: 50em;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 0 1rem;
 }
 @media (max-width: 767px) {
   main.content {
