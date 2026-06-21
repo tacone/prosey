@@ -77,6 +77,17 @@ ${css}
 
   }
 }
+main.content {
+  max-width: 50em;
+  margin: 0 auto;
+  padding: 1rem;
+}
+@media (max-width: 767px) {
+  main.content {
+    margin-top: 0rem;
+  }
+}
+
 h1 { --pico-font-size: 1.9rem; }
 h2 { --pico-font-size: 1.5rem; }
 h3 { --pico-font-size: 1.25rem; }
@@ -86,12 +97,22 @@ h6 { --pico-font-size: 0.85rem; }
 h1, h2, h3, h4, h5, h6 {
   --pico-font-weight: 500;
   --pico-line-height: 1.25;
-  margin-top: 0;
+  margin-top: 0.1em;
+  margin-bottom: 0.666em;
 }
 h1 {
   letter-spacing: -0.03em;
+  margin-top: calc(var(--pico-typography-spacing-vertical) * 2);
   margin-bottom: calc(var(--pico-typography-spacing-vertical) * 2);
 }
+@media (max-width: 767px) {
+  h1 {
+    margin-top: calc(var(--pico-typography-spacing-vertical) * 2);
+    margin-bottom: calc(var(--pico-typography-spacing-vertical) * 2);
+    text-align: center;
+  }
+}
+
 li:last-child {
   margin-bottom: 0px;
 }
@@ -120,7 +141,7 @@ img[alt="Prosey"]:hover, img[alt="Prosey"]:active, img[alt="Prosey"]:focus { fil
 <div style="flex:1;text-align:center;font-size:.85rem;color:var(--pico-muted-color)">${watchMeta ? watchMetaHtml(watchMeta.duration, watchMeta.wordCount, watchMeta.videoId) : ""}</div>
 <button id="theme-btn" type="button" style="background:none;border:none;cursor:pointer;padding:0;line-height:1;opacity:.5;filter:grayscale(100%);transition:all 0.3s;flex-shrink:0">💡</button>
 </div>
-<main style="max-width:50em;margin:0 auto;padding:1rem">
+<main class="content">
 ${body}
 </main>
 <script>
