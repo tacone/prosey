@@ -96,6 +96,27 @@ Workstation: xoxo | Workspace: prosey
 - Metadata removed from markdown body (now rendered by HTML template)
 - Version bump
 
+## 2026-06-22 — v0.8.1 — default model: DeepSeek V4 Flash
+
+- Default AI command updated to use `opencode/deepseek-v4-flash-free` model with `--variant low`
+- Tested with Rick Astley — Never Gonna Give You Up (full HTML summary generated)
+
+## 2026-06-19 — v0.8.0 — configurable default format + config merge
+
+- Default output format now configurable via `format` key in config (default: `"html"`)
+- `loadConfig()` merges embedded defaults with user config (user values win)
+- `--reset-config` writes a fully commented-out template for editing
+- `formatExplicit` flag tracks whether user passed a format flag on CLI
+- Old configs without `format` key fall back to `"html"` from embedded defaults
+
+## 2026-06-18 — v0.7.0 — watch/read metadata in header
+
+- Added centered watch time + read time metadata line in HTML header: `Xh Ymin watch — N min read`
+- "watch" links to the YouTube video with hover underline in muted color
+- Track duration stored in `info.json` cache for both summarize and read paths
+- Metadata removed from markdown body (now rendered by HTML template)
+- Version bump
+
 ## 2026-06-16 — v0.6.0 — structured AI input for summarize
 
 - `prosey summarize` now feeds the same structured content as `prosey read`:

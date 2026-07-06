@@ -25,7 +25,7 @@ hints = true
 #   OPENCODE_PERMISSION='{"read":"allow","write":"deny","edit":"deny","bash":"deny","glob":"deny","grep":"deny","webfetch":\"deny\",\"task\":\"deny\",\"todowrite\":\"deny\",\"websearch\":\"deny","lsp":"deny"}' opencode run --pure
 #   copilot -s --deny-all-tools --read-only
 
-command = "OPENCODE_PERMISSION='{\"read\":\"allow\",\"write\":\"deny\",\"edit\":\"deny\",\"bash\":\"deny\",\"glob\":\"deny\",\"grep\":\"deny\",\"webfetch\":\"deny\",\"task\":\"deny\",\"todowrite\":\"deny\",\"websearch\":\"deny\",\"lsp\":\"deny\"}' opencode run --pure --variant low"
+command = "OPENCODE_PERMISSION='{\"read\":\"allow\",\"write\":\"deny\",\"edit\":\"deny\",\"bash\":\"deny\",\"glob\":\"deny\",\"grep\":\"deny\",\"webfetch\":\"deny\",\"task\":\"deny\",\"todowrite\":\"deny\",\"websearch\":\"deny\",\"lsp\":\"deny\"}' opencode run --pure  --model opencode/deepseek-v4-flash-free --variant low"
 
 [summarize]
 
