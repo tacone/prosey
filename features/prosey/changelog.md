@@ -96,6 +96,12 @@ Workstation: xoxo | Workspace: prosey
 - Metadata removed from markdown body (now rendered by HTML template)
 - Version bump
 
+## 2026-07-27 — v0.9.0 — channel link with description tooltip in HTML header
+
+- Author name (channel link, `title` attribute shows channel description) before watch/read time
+- Added `fetchChannelDescription()` via InnerTube browse endpoint, cached in `info.json`
+- All 126 tests pass
+
 ## 2026-06-22 — v0.8.1 — default model: DeepSeek V4 Flash
 
 - Default AI command updated to use `opencode/deepseek-v4-flash-free` model with `--variant low`

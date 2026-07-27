@@ -34,20 +34,43 @@ function escapeHtml(text: string): string {
     .replace(/"/g, "&quot;");
 }
 
-function watchMetaHtml(duration: number, wordCount: number, videoId: string): string {
+function watchMetaHtml(
+  duration: number,
+  wordCount: number,
+  videoId: string,
+  channelName?: string,
+  channelId?: string,
+  channelDescription?: string,
+): string {
+  const sep = '<span style="opacity: 0.4">&nbsp;&nbsp;|&nbsp;&nbsp;</span>';
   const h = Math.floor(duration / 3600);
   const m = Math.round((duration % 3600) / 60);
   const durStr = h > 0 ? `${h} h ${m} min` : `${m} min`;
   const readTime = Math.ceil(wordCount / 200);
-  const url = `https://youtube.com/watch?v=${videoId}`;
-  const separator = '<span style="opacity: 0.4">&nbsp;&nbsp;|&nbsp;&nbsp;</span>';
-  return `<a href="${url}" class="watch-link">${durStr} watch</a> ${separator} ${readTime} min read`;
+  const watchUrl = `https://youtube.com/watch?v=${videoId}`;
+  let parts = "";
+  if (channelName) {
+    const chUrl = channelId
+      ? `https://youtube.com/channel/${channelId}`
+      : `https://youtube.com/@${encodeURIComponent(channelName)}`;
+    const chDesc = channelDescription || channelName;
+    parts += `<a href="${chUrl}" class="watch-link" title="${escapeHtml(chDesc)}">${escapeHtml(channelName)}</a>${sep}`;
+  }
+  parts += `<a href="${watchUrl}" class="watch-link">${durStr} watch</a>${sep}${readTime} min read`;
+  return parts;
 }
 
 export async function generateHtml(
   markdown: string,
   title?: string,
-  watchMeta?: { videoId: string; duration: number; wordCount: number },
+  watchMeta?: {
+    videoId: string;
+    duration: number;
+    wordCount: number;
+    channelName?: string;
+    channelId?: string;
+    channelDescription?: string;
+  },
 ): Promise<string> {
   const [css, body] = await Promise.all([getPicoCss(), marked.parse(markdown)]);
 
@@ -138,7 +161,7 @@ img[alt="Prosey"]:hover, img[alt="Prosey"]:active, img[alt="Prosey"]:focus { fil
 <body>
 <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1rem 0">
 <img src="${LOGO_DATA_URI}" alt="Prosey" title="Prosey" style="vertical-align:top;flex-shrink:0">
-<div style="flex:1;text-align:center;font-size:.85rem;color:var(--pico-muted-color)">${watchMeta ? watchMetaHtml(watchMeta.duration, watchMeta.wordCount, watchMeta.videoId) : ""}</div>
+<div style="flex:1;text-align:center;font-size:.85rem;color:var(--pico-muted-color)">${watchMeta ? watchMetaHtml(watchMeta.duration, watchMeta.wordCount, watchMeta.videoId, watchMeta.channelName, watchMeta.channelId, watchMeta.channelDescription) : ""}</div>
 <button id="theme-btn" type="button" style="background:none;border:none;cursor:pointer;padding:0;line-height:1;opacity:.5;filter:grayscale(100%);transition:all 0.3s;flex-shrink:0">💡</button>
 </div>
 <main class="content">

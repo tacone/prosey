@@ -25,6 +25,30 @@ import { checkVersion } from "./version-check";
 import pkg from "../package.json";
 import prettier from "prettier";
 
+const YT_INNERTUBE_API_KEY = "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8";
+
+async function fetchChannelDescription(channelId: string): Promise<string | undefined> {
+  try {
+    const resp = await fetch(
+      `https://www.youtube.com/youtubei/v1/browse?key=${YT_INNERTUBE_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          context: {
+            client: { clientName: "WEB", clientVersion: "2.20240101.00.00" },
+          },
+          browseId: channelId,
+        }),
+      },
+    );
+    const data: any = await resp.json();
+    return data?.metadata?.channelMetadataRenderer?.description;
+  } catch {
+    return undefined;
+  }
+}
+
 process.stdout.on("error", (err: NodeJS.ErrnoException) => {
   if (err.code === "EPIPE") process.exit(0);
 });
@@ -484,6 +508,9 @@ try {
     let structuredContent: string;
     let videoTitle: string | undefined;
     let videoDuration = 0;
+    let channelName: string | undefined;
+    let channelId: string | undefined;
+    let channelDescription: string | undefined;
 
     if (!segments) {
       info("Fetching transcript...");
@@ -494,9 +521,14 @@ try {
       };
       segments = result.segments;
       videoDuration = result.videoDetails.lengthSeconds;
+      channelName = result.videoDetails.author;
+      channelId = result.videoDetails.channelId;
+      channelDescription = await fetchChannelDescription(channelId);
       const infoJson = JSON.stringify({
         title: result.videoDetails.title,
-        channel: result.videoDetails.author,
+        channel: channelName,
+        channelId: channelId,
+        channelDescription: channelDescription,
         description: result.videoDetails.description,
         duration: videoDuration,
       });
@@ -533,9 +565,14 @@ try {
           segments: TranscriptSegment[];
         };
         videoDuration = fallbackResult.videoDetails.lengthSeconds;
+        channelName = fallbackResult.videoDetails.author;
+        channelId = fallbackResult.videoDetails.channelId;
+        channelDescription = await fetchChannelDescription(channelId);
         cachedInfo = JSON.stringify({
           title: fallbackResult.videoDetails.title,
           channel: fallbackResult.videoDetails.author,
+          channelId: channelId,
+          channelDescription: channelDescription,
           description: fallbackResult.videoDetails.description,
           duration: videoDuration,
         });
@@ -553,6 +590,9 @@ try {
       const cachedInfoObj = JSON.parse(cachedInfo);
       videoTitle = cachedInfoObj.title;
       videoDuration = cachedInfoObj.duration ?? 0;
+      channelName = cachedInfoObj.channel;
+      channelId = cachedInfoObj.channelId;
+      channelDescription = cachedInfoObj.channelDescription;
       const truncatedInfo = JSON.stringify({
         title: cachedInfoObj.title,
         channel: cachedInfoObj.channel,
@@ -586,6 +626,9 @@ try {
         videoId,
         duration: videoDuration,
         wordCount,
+        channelName,
+        channelId,
+        channelDescription,
       });
       const htmlPath = join(dir, "summary.html");
       await writeFile(htmlPath, htmlContent, "utf8");
@@ -622,6 +665,9 @@ try {
     let md: string | null = null;
     let videoTitle: string | undefined;
     let videoDuration = 0;
+    let channelName: string | undefined;
+    let channelId: string | undefined;
+    let channelDescription: string | undefined;
 
     startTimer();
 
@@ -660,9 +706,14 @@ try {
       };
       segments = result.segments;
       videoDuration = result.videoDetails.lengthSeconds;
+      channelName = result.videoDetails.author;
+      channelId = result.videoDetails.channelId;
+      channelDescription = await fetchChannelDescription(channelId);
       const infoJson = JSON.stringify({
         title: result.videoDetails.title,
-        channel: result.videoDetails.author,
+        channel: channelName,
+        channelId: channelId,
+        channelDescription: channelDescription,
         description: result.videoDetails.description,
         duration: videoDuration,
       });
@@ -712,9 +763,14 @@ try {
           segments: TranscriptSegment[];
         };
         videoDuration = fallbackResult.videoDetails.lengthSeconds;
+        channelName = fallbackResult.videoDetails.author;
+        channelId = fallbackResult.videoDetails.channelId;
+        channelDescription = await fetchChannelDescription(channelId);
         cachedInfo = JSON.stringify({
           title: fallbackResult.videoDetails.title,
           channel: fallbackResult.videoDetails.author,
+          channelId: channelId,
+          channelDescription: channelDescription,
           description: fallbackResult.videoDetails.description,
           duration: videoDuration,
         });
@@ -732,6 +788,9 @@ try {
       const cachedInfoObj = JSON.parse(cachedInfo);
       videoTitle = cachedInfoObj.title;
       videoDuration = cachedInfoObj.duration ?? 0;
+      channelName = cachedInfoObj.channel;
+      channelId = cachedInfoObj.channelId;
+      channelDescription = cachedInfoObj.channelDescription;
       const truncatedInfo = JSON.stringify({
         title: cachedInfoObj.title,
         channel: cachedInfoObj.channel,
@@ -760,6 +819,9 @@ try {
         videoId,
         duration: videoDuration,
         wordCount,
+        channelName,
+        channelId,
+        channelDescription,
       });
       const htmlPath = join(dir, "transcript.html");
       await writeFile(htmlPath, htmlContent, "utf8");
