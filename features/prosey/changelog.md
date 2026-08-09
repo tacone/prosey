@@ -96,6 +96,13 @@ Workstation: xoxo | Workspace: prosey
 - Metadata removed from markdown body (now rendered by HTML template)
 - Version bump
 
+## 2026-07-27 — v0.9.1 — remove hardcoded InnerTube API key
+
+- Removed hardcoded `AIzaSy...` InnerTube API key; browse endpoint works without it (WEB client requests don't require it)
+- `fetchChannelDescription()` moved to `src/channel-description.ts` with keyless POST to `youtubei/v1/browse`
+- Added 3 unit tests with mocked fetch (no `key=` in URL, missing description, network error)
+- 129 tests pass
+
 ## 2026-07-27 — v0.9.0 — channel link with description tooltip in HTML header
 
 - Author name (channel link, `title` attribute shows channel description) before watch/read time

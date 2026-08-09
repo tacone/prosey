@@ -21,33 +21,10 @@ import {
 import { cacheDir, readCache, writeCache, extractVideoId } from "./cache";
 import { extractChapters, formatChaptersAsText, formatChaptersAsJson } from "./extract-chapters";
 import { generateHtml, openInBrowser } from "./html";
+import { fetchChannelDescription } from "./channel-description";
 import { checkVersion } from "./version-check";
 import pkg from "../package.json";
 import prettier from "prettier";
-
-const YT_INNERTUBE_API_KEY = "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8";
-
-async function fetchChannelDescription(channelId: string): Promise<string | undefined> {
-  try {
-    const resp = await fetch(
-      `https://www.youtube.com/youtubei/v1/browse?key=${YT_INNERTUBE_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          context: {
-            client: { clientName: "WEB", clientVersion: "2.20240101.00.00" },
-          },
-          browseId: channelId,
-        }),
-      },
-    );
-    const data: any = await resp.json();
-    return data?.metadata?.channelMetadataRenderer?.description;
-  } catch {
-    return undefined;
-  }
-}
 
 process.stdout.on("error", (err: NodeJS.ErrnoException) => {
   if (err.code === "EPIPE") process.exit(0);
