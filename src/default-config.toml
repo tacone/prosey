@@ -15,6 +15,11 @@ pager = "auto"
 # Can also be set via PROSEY_HINTS env var (yes, no, 1, 0, true, false).
 hints = true
 
+# Data directory for cached transcripts, summaries, and generated HTML.
+# Empty (default): $XDG_DATA_HOME/prosey, or ~/.local/share/prosey.
+# Can also be set via the PROSEY_DATA_PATH env var (takes precedence).
+data_dir = ""
+
 [ai]
 
 # Default command for AI operations (summarize, transcribe).

@@ -8,8 +8,20 @@ the same video (with the same options) are instant and offline-capable.
 ## 2. Cache location
 
 ```
-/tmp/prosey/<cache-key>/
+$XDG_DATA_HOME/prosey/<cache-key>/
 ```
+
+Resolution order:
+
+1. `PROSEY_DATA_PATH` env var (takes precedence)
+2. `data_dir` key in `config.toml` (empty default)
+3. `$XDG_DATA_HOME/prosey` if `XDG_DATA_HOME` is set
+4. `~/.local/share/prosey` (fallback)
+
+The location follows the XDG data convention (not cache) because the stored
+summaries and generated pages are user data — they survive reboots and are
+intended to be kept indefinitely. `PROSEY_DATA_PATH` mirrors
+`PROSEY_CONFIG_PATH` and is the recommended override for tests.
 
 ## 3. Cache key
 
@@ -53,11 +65,12 @@ fetches fresh data.
   instead of making network calls or re-running the command.
 - **Invalidation**: `--no-cache` flag skips all cache reads and overwrites
   cache files on success.
+- No TTL or expiry is enforced.
 
 ## 6. Summarize security
 
 When running the summarize command, the working directory is set to
-`/tmp/prosey/<cache-key>/`. The command runs inside the cache directory so
+`<data-dir>/<cache-key>/`. The command runs inside the cache directory so
 its file access is scoped to that directory.
 
 ## 7. Flags
@@ -78,5 +91,5 @@ its file access is scoped to that directory.
 ## 9. Tech stack
 
 - Filesystem (POSIX): `node:fs/promises`
-- Temp directory: hardcoded `/tmp/prosey/` (Linux/macOS standard)
+- Data directory: XDG data convention (`$XDG_DATA_HOME/prosey`, fallback `~/.local/share/prosey`), overridable via `PROSEY_DATA_PATH` env or `data_dir` config
 - Hash: SHA-256 via `node:crypto`, truncated to 8 hex chars

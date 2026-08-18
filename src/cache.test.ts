@@ -2,12 +2,18 @@ import { describe, expect, test, afterEach } from "bun:test";
 import { rm, readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { cacheKey, cacheDir, readCache, writeCache, extractVideoId } from "./cache";
+import { cacheKey, cacheDir, readCache, writeCache, extractVideoId, dataDir } from "./cache";
 
-const testDir = "/tmp/prosey/test-cache-spec";
+const testDir = "/tmp/prosey-test/test-cache-spec";
+const ORIGINAL_DATA_PATH = process.env.PROSEY_DATA_PATH;
+const ORIGINAL_XDG_DATA = process.env.XDG_DATA_HOME;
 
 afterEach(async () => {
   await rm(testDir, { recursive: true, force: true });
+  if (ORIGINAL_DATA_PATH) process.env.PROSEY_DATA_PATH = ORIGINAL_DATA_PATH;
+  else delete process.env.PROSEY_DATA_PATH;
+  if (ORIGINAL_XDG_DATA) process.env.XDG_DATA_HOME = ORIGINAL_XDG_DATA;
+  else delete process.env.XDG_DATA_HOME;
 });
 
 describe("cacheKey", () => {
@@ -36,11 +42,32 @@ describe("cacheKey", () => {
   });
 });
 
+describe("dataDir", () => {
+  test("PROSEY_DATA_PATH takes precedence", () => {
+    process.env.PROSEY_DATA_PATH = "/custom/data";
+    delete process.env.XDG_DATA_HOME;
+    expect(dataDir()).toBe("/custom/data");
+  });
+
+  test("config dataDir argument used when set", () => {
+    delete process.env.PROSEY_DATA_PATH;
+    delete process.env.XDG_DATA_HOME;
+    expect(dataDir("/from/config")).toBe("/from/config");
+  });
+
+  test("falls back to XDG_DATA_HOME", () => {
+    delete process.env.PROSEY_DATA_PATH;
+    process.env.XDG_DATA_HOME = "/custom/xdg-data";
+    expect(dataDir()).toBe("/custom/xdg-data/prosey");
+  });
+});
+
 describe("cacheDir", () => {
-  test("returns path under /tmp/prosey with cache key", () => {
+  test("returns path under the data dir with cache key", () => {
+    process.env.PROSEY_DATA_PATH = "/custom/data";
     const key = cacheKey("abc123def45", {});
     const dir = cacheDir("abc123def45", {});
-    expect(dir).toBe(`/tmp/prosey/${key}`);
+    expect(dir).toBe(`/custom/data/${key}`);
   });
 });
 

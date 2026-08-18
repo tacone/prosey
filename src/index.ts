@@ -18,7 +18,7 @@ import {
   resolveTranscribeCmd,
   resolveTranscribePrompt,
 } from "./config-resolve";
-import { cacheDir, readCache, writeCache, extractVideoId } from "./cache";
+import { cacheDir, readCache, writeCache, extractVideoId, dataDir } from "./cache";
 import { extractChapters, formatChaptersAsText, formatChaptersAsJson } from "./extract-chapters";
 import { generateHtml, openInBrowser } from "./html";
 import { fetchChannelDescription } from "./channel-description";
@@ -431,6 +431,8 @@ if (extractTimestamps) {
 }
 
 try {
+  const activeDataDir = dataDir(config.dataDir);
+
   if (mode === "info") {
     const result = await fetchTranscript(videoId, { videoDetails: true, lang } as any);
     if (outputJson) {
@@ -451,7 +453,7 @@ try {
     }
 
     const cacheOpts = { lang, mode: "summarize", noDecode };
-    const dir = cacheDir(videoId, cacheOpts);
+    const dir = cacheDir(videoId, cacheOpts, activeDataDir);
     let segments: TranscriptSegment[] | null = null;
     let summary: string | null = null;
     let cachedInfo: string | null = null;
@@ -637,7 +639,7 @@ try {
     }
 
     const cacheOpts = { lang, mode: "transcribe", noDecode };
-    const dir = cacheDir(videoId, cacheOpts);
+    const dir = cacheDir(videoId, cacheOpts, activeDataDir);
     let segments: TranscriptSegment[] | null = null;
     let md: string | null = null;
     let videoTitle: string | undefined;

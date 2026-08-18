@@ -9,6 +9,7 @@ export interface ProseyConfig {
   pager?: string;
   hints?: boolean;
   format?: string;
+  dataDir?: string;
   ai?: {
     command?: string;
   };
@@ -52,6 +53,7 @@ export function mergeOverDefaults(user: ProseyConfig, defaults: ProseyConfig): P
     pager: user.pager ?? defaults.pager,
     hints: user.hints ?? defaults.hints,
     format: user.format ?? defaults.format,
+    dataDir: user.dataDir ?? defaults.dataDir,
     ai: user.ai?.command !== undefined ? user.ai : defaults.ai,
     summarize: {
       command: user.summarize?.command ?? defaults.summarize?.command,
@@ -64,9 +66,21 @@ export function mergeOverDefaults(user: ProseyConfig, defaults: ProseyConfig): P
   };
 }
 
+function camelizeKeys(obj: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const camel = key.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
+    out[camel] =
+      value !== null && typeof value === "object" && !Array.isArray(value)
+        ? camelizeKeys(value as Record<string, unknown>)
+        : value;
+  }
+  return out;
+}
+
 async function parseOrEmpty(text: string): Promise<ProseyConfig> {
   try {
-    return load(text) as ProseyConfig;
+    return camelizeKeys(load(text) as Record<string, unknown>) as ProseyConfig;
   } catch {
     return {};
   }

@@ -96,6 +96,13 @@ Workstation: xoxo | Workspace: prosey
 - Metadata removed from markdown body (now rendered by HTML template)
 - Version bump
 
+## 2026-08-18 — v0.10.0 — persistent data dir (XDG data convention)
+
+- Cache moved from `/tmp/prosey` to `$XDG_DATA_HOME/prosey` (fallback `~/.local/share/prosey`) — survives reboots
+- Data dir configurable via `data_dir` in `config.toml` (empty default) or `PROSEY_DATA_PATH` env var (takes precedence)
+- Added `camelizeKeys()` in config parsing: js-toml returns snake_case keys (`data_dir`), mapped to the camelCase interface
+- 133 tests pass
+
 ## 2026-07-27 — v0.9.1 — remove hardcoded InnerTube API key
 
 - Removed hardcoded `AIzaSy...` InnerTube API key; browse endpoint works without it (WEB client requests don't require it)

@@ -53,6 +53,7 @@ describe("loadConfig", () => {
     expect(config.pager).toBe("auto");
     expect(config.hints).toBe(true);
     expect(config.format).toBe("html");
+    expect(config.dataDir).toBe("");
     expect(config.ai?.command).toBeString();
     expect(config.summarize?.prompt).toBeString();
     expect(existsSync(tmpConfig)).toBe(true);
@@ -125,6 +126,7 @@ describe("mergeOverDefaults", () => {
     pager: "auto",
     hints: true,
     format: "html",
+    dataDir: "",
     ai: { command: "opencode run" },
     summarize: { prompt: "default summary", command: "opencode run" },
     transcribe: { prompt: "default transcribe" },
@@ -135,6 +137,7 @@ describe("mergeOverDefaults", () => {
     expect(result.pager).toBe("auto");
     expect(result.hints).toBe(true);
     expect(result.format).toBe("html");
+    expect(result.dataDir).toBe("");
     expect(result.ai?.command).toBe("opencode run");
     expect(result.summarize?.prompt).toBe("default summary");
     expect(result.transcribe?.prompt).toBe("default transcribe");
@@ -156,6 +159,12 @@ describe("mergeOverDefaults", () => {
     const result = mergeOverDefaults({ format: "markdown" }, defaults);
     expect(result.format).toBe("markdown");
     expect(result.hints).toBe(true);
+  });
+
+  test("user dataDir overrides default", () => {
+    const result = mergeOverDefaults({ dataDir: "/custom/data" }, defaults);
+    expect(result.dataDir).toBe("/custom/data");
+    expect(result.pager).toBe("auto");
   });
 
   test("user ai.command overrides default", () => {
