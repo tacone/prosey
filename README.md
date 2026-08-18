@@ -78,6 +78,7 @@ prosey [options] <video-url-or-id>
 prosey read [options] <video-url-or-id>
 prosey info [options] <video-url-or-id>
 prosey summarize [options] <video-url-or-id>
+prosey index
 prosey config
 prosey help
 ```
@@ -92,6 +93,11 @@ The `read` command downloads the transcript and prints it to stdout (plain text,
 markdown, or JSON). This is useful when you don't need AI processing.
 
 The `info` command shows video metadata (title, channel, duration, views).
+
+The `index` command rebuilds the document index and opens it in the browser.
+The index lists every summary and transcription stored in the data directory
+and is automatically rebuilt after each summarize/transcribe run. Clicking the
+Prosey logo on any content page navigates back to it.
 
 The `config` command opens your config file in `$EDITOR` for editing. If
 `$EDITOR` is not set, the config file path is printed.

@@ -1,8 +1,16 @@
 import { describe, expect, test, afterEach } from "bun:test";
-import { rm, readFile } from "node:fs/promises";
+import { rm, readFile, mkdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { cacheKey, cacheDir, readCache, writeCache, extractVideoId, dataDir } from "./cache";
+import {
+  cacheKey,
+  cacheDir,
+  readCache,
+  writeCache,
+  extractVideoId,
+  dataDir,
+  scanDocuments,
+} from "./cache";
 
 const testDir = "/tmp/prosey-test/test-cache-spec";
 const ORIGINAL_DATA_PATH = process.env.PROSEY_DATA_PATH;
@@ -96,6 +104,49 @@ describe("extractVideoId", () => {
 
   test("invalid URL without video ID returns null", () => {
     expect(extractVideoId("https://example.com/search?q=hello")).toBeNull();
+  });
+});
+
+describe("scanDocuments", () => {
+  test("lists docs with summary/transcript, reads info.json", async () => {
+    const base = join(testDir, "scan");
+    await mkdir(join(base, "dQw4w9WgXcQ_62d1ff1b"), { recursive: true });
+    await writeFile(
+      join(base, "dQw4w9WgXcQ_62d1ff1b", "info.json"),
+      JSON.stringify({ title: "Never Gonna Give You Up", channel: "Rick Astley", duration: 212 }),
+    );
+    await writeFile(join(base, "dQw4w9WgXcQ_62d1ff1b", "summary.md"), "hello world");
+    await mkdir(join(base, "not-a-cache-key"), { recursive: true });
+    await writeFile(join(base, "not-a-cache-key", "summary.md"), "x");
+
+    const docs = await scanDocuments(base);
+
+    expect(docs).toHaveLength(1);
+    expect(docs[0]!.title).toBe("Never Gonna Give You Up");
+    expect(docs[0]!.channel).toBe("Rick Astley");
+    expect(docs[0]!.duration).toBe(212);
+    expect(docs[0]!.summary!.wordCount).toBe(2);
+    expect(docs[0]!.summary!.htmlPath).toBeUndefined();
+  });
+
+  test("detects transcript-only docs and existing html", async () => {
+    const base = join(testDir, "scan2");
+    await mkdir(join(base, "BbovUqaQ9Cg_62d1ff1b"), { recursive: true });
+    await writeFile(join(base, "BbovUqaQ9Cg_62d1ff1b", "transcript.md"), "one two three");
+    await writeFile(join(base, "BbovUqaQ9Cg_62d1ff1b", "transcript.html"), "<html>");
+
+    const docs = await scanDocuments(base);
+
+    expect(docs).toHaveLength(1);
+    expect(docs[0]!.summary).toBeUndefined();
+    expect(docs[0]!.transcript!.wordCount).toBe(3);
+    expect(docs[0]!.transcript!.htmlPath).toBe(
+      join(base, "BbovUqaQ9Cg_62d1ff1b", "transcript.html"),
+    );
+  });
+
+  test("returns [] for missing dir", async () => {
+    expect(await scanDocuments(join(testDir, "nonexistent"))).toEqual([]);
   });
 });
 

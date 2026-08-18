@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, mkdir, readdir, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
@@ -7,6 +7,7 @@ import { homedir } from "node:os";
 const RE_YOUTUBE =
   /(?:v=|\/|v\/|embed\/|watch\?.*v=|youtu\.be\/|\/v\/|e\/|watch\?.*vi?=|\/embed\/|\/v\/|vi?\/|watch\?.*vi?=|youtu\.be\/|\/vi?\/|\/e\/)([a-zA-Z0-9_-]{11})/i;
 const RE_BARE_ID = /^[a-zA-Z0-9_-]{11}$/;
+const RE_CACHE_KEY = /^[a-zA-Z0-9_-]{11}_[0-9a-f]{8}$/;
 
 export function extractVideoId(input: string): string | null {
   if (RE_BARE_ID.test(input)) return input;
@@ -55,4 +56,72 @@ export async function readCache(dir: string, filename: string): Promise<string |
 export async function writeCache(dir: string, filename: string, data: string): Promise<void> {
   if (!existsSync(dir)) await mkdir(dir, { recursive: true });
   await writeFile(join(dir, filename), data, "utf8");
+}
+
+export interface CachedItem {
+  mdPath: string;
+  htmlPath?: string;
+  mtime: number;
+  wordCount: number;
+}
+
+export interface CachedDocument {
+  dir: string;
+  title: string;
+  channel?: string;
+  channelId?: string;
+  channelDescription?: string;
+  duration: number;
+  summary?: CachedItem;
+  transcript?: CachedItem;
+}
+
+export async function scanDocuments(baseDir: string): Promise<CachedDocument[]> {
+  let entries;
+  try {
+    entries = await readdir(baseDir, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+
+  const docs: CachedDocument[] = [];
+  for (const entry of entries) {
+    if (!entry.isDirectory() || !RE_CACHE_KEY.test(entry.name)) continue;
+    const dir = join(baseDir, entry.name);
+    const doc: CachedDocument = { dir, title: entry.name, duration: 0 };
+
+    const infoRaw = await readFile(join(dir, "info.json"), "utf8").catch(() => null);
+    if (infoRaw) {
+      try {
+        const info = JSON.parse(infoRaw);
+        doc.title = info.title ?? doc.title;
+        doc.channel = info.channel;
+        doc.channelId = info.channelId;
+        doc.channelDescription = info.channelDescription;
+        doc.duration = info.duration ?? 0;
+      } catch {
+        // keep folder-name fallback
+      }
+    }
+
+    for (const kind of ["summary", "transcript"] as const) {
+      const mdPath = join(dir, `${kind}.md`);
+      const mdStat = await stat(mdPath).catch(() => null);
+      if (!mdStat) continue;
+      const item: CachedItem = {
+        mdPath,
+        htmlPath: existsSync(join(dir, `${kind}.html`)) ? join(dir, `${kind}.html`) : undefined,
+        mtime: mdStat.mtimeMs,
+        wordCount: 0,
+      };
+      const md = await readFile(mdPath, "utf8").catch(() => "");
+      item.wordCount = md.split(/\s+/).filter(Boolean).length;
+      if (kind === "summary") doc.summary = item;
+      else doc.transcript = item;
+    }
+
+    if (doc.summary || doc.transcript) docs.push(doc);
+  }
+
+  return docs;
 }

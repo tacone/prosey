@@ -20,11 +20,10 @@ import {
 } from "./config-resolve";
 import { cacheDir, readCache, writeCache, extractVideoId, dataDir } from "./cache";
 import { extractChapters, formatChaptersAsText, formatChaptersAsJson } from "./extract-chapters";
-import { generateHtml, openInBrowser } from "./html";
+import { generateHtml, openInBrowser, formatMd, rebuildIndex } from "./html";
 import { fetchChannelDescription } from "./channel-description";
 import { checkVersion } from "./version-check";
 import pkg from "../package.json";
-import prettier from "prettier";
 
 process.stdout.on("error", (err: NodeJS.ErrnoException) => {
   if (err.code === "EPIPE") process.exit(0);
@@ -54,6 +53,7 @@ Usage: ${NAME} [options] <video-url-or-id>
        ${NAME} read [options] <video-url-or-id>
        ${NAME} info [options] <video-url-or-id>
        ${NAME} summarize [options] <video-url-or-id>
+       ${NAME} index
        ${NAME} config
        ${NAME} help
 
@@ -63,6 +63,7 @@ Commands:
   summarize             Pipe transcript to the AI command (default command)
   read                  Download and print a richly formatted transcript
   info                  Show video metadata (title, channel, duration, etc.)
+  index                 Rebuild and open the document index in the browser
   config                Open config file in \$EDITOR
   help                  Show this help message
 
@@ -170,14 +171,6 @@ function printLanguages(languages: CaptionTrackInfo[]): void {
   console.log(`Available transcripts (${languages.length}):\n${rows.join("\n")}`);
 }
 
-async function formatMd(text: string): Promise<string> {
-  try {
-    return await prettier.format(text, { parser: "markdown" });
-  } catch {
-    return text;
-  }
-}
-
 async function outputText(text: string): Promise<void> {
   if (outputPath) {
     await writeFile(outputPath, text, "utf8");
@@ -236,7 +229,7 @@ const config: ProseyConfig = await loadConfig().catch(() => ({}) as ProseyConfig
 
 let mode = "summarize";
 const subcmdIndex = args.findIndex(
-  (a) => a === "info" || a === "summarize" || a === "config" || a === "read",
+  (a) => a === "info" || a === "summarize" || a === "config" || a === "read" || a === "index",
 );
 if (subcmdIndex !== -1) {
   mode = args[subcmdIndex]!;
@@ -359,6 +352,12 @@ if (mode === "config") {
   } else {
     console.log(`Config file: ${path}`);
   }
+  exitProcess(0);
+}
+
+if (mode === "index") {
+  const indexPath = await rebuildIndex(dataDir(config.dataDir));
+  if (indexPath) await openInBrowser(indexPath);
   exitProcess(0);
 }
 
@@ -622,6 +621,7 @@ try {
     } else {
       await outputText(formatted + "\n");
     }
+    await rebuildIndex(activeDataDir);
     exitProcess(0);
   } else if (listOnly) {
     const languages = await listLanguages(videoId);
@@ -815,6 +815,7 @@ try {
     } else {
       await outputText(formatted + "\n");
     }
+    await rebuildIndex(activeDataDir);
     exitProcess(0);
   }
 
