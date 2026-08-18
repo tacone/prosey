@@ -1,5 +1,13 @@
 # Changelog — Prosey
 
+## 2026-08-18 (2) — v0.12.0 — render command
+
+Workstation: xoxo | Workspace: prosey
+
+- New `prosey render` command: regenerates every HTML page from cached markdown (no network or AI processing) and rewrites the index
+- Per-page rendering shared between `rebuildIndex` and `renderAll` via `writeDocumentHtml()`
+- 143 tests pass
+
 ## 2026-08-18 (1) — v0.11.0 — document index
 
 Workstation: xoxo | Workspace: prosey

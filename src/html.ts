@@ -283,6 +283,23 @@ ${THEME_SCRIPT}
   })();
 }
 
+async function writeDocumentHtml(
+  doc: CachedDocument,
+  kind: "summary" | "transcript",
+  item: { mdPath: string; htmlPath?: string; wordCount: number },
+): Promise<void> {
+  const md = await readFile(item.mdPath, "utf8");
+  const html = await generateHtml(await formatMd(md), doc.title, {
+    videoId: doc.dir.split(/[\\/]/).pop()!.slice(0, 11),
+    duration: doc.duration,
+    wordCount: item.wordCount,
+    channelName: doc.channel,
+    channelId: doc.channelId,
+    channelDescription: doc.channelDescription,
+  });
+  await writeFile(join(doc.dir, `${kind}.html`), html, "utf8");
+}
+
 export async function rebuildIndex(baseDir: string): Promise<string | null> {
   const docs = await scanDocuments(baseDir);
   for (const doc of docs) {
@@ -291,22 +308,30 @@ export async function rebuildIndex(baseDir: string): Promise<string | null> {
       if (!item) continue;
       const existing = item.htmlPath ? await readFile(item.htmlPath, "utf8").catch(() => "") : "";
       if (existing.includes(HTML_MARKER)) continue;
-      const md = await readFile(item.mdPath, "utf8");
-      const html = await generateHtml(await formatMd(md), doc.title, {
-        videoId: doc.dir.split(/[\\/]/).pop()!.slice(0, 11),
-        duration: doc.duration,
-        wordCount: item.wordCount,
-        channelName: doc.channel,
-        channelId: doc.channelId,
-        channelDescription: doc.channelDescription,
-      });
-      await writeFile(join(doc.dir, `${kind}.html`), html, "utf8");
+      await writeDocumentHtml(doc, kind, item);
       item.htmlPath = join(doc.dir, `${kind}.html`);
     }
   }
   const indexPath = join(baseDir, "index.html");
   await writeFile(indexPath, await generateIndexHtml(docs), "utf8");
   return indexPath;
+}
+
+export async function renderAll(baseDir: string): Promise<number> {
+  const docs = await scanDocuments(baseDir);
+  let pages = 0;
+  for (const doc of docs) {
+    for (const kind of ["summary", "transcript"] as const) {
+      const item = doc[kind];
+      if (!item) continue;
+      await writeDocumentHtml(doc, kind, item);
+      item.htmlPath = join(doc.dir, `${kind}.html`);
+      pages++;
+    }
+  }
+  const indexPath = join(baseDir, "index.html");
+  await writeFile(indexPath, await generateIndexHtml(docs), "utf8");
+  return pages;
 }
 
 export function openInBrowser(htmlPath: string): Promise<void> {

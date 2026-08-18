@@ -20,7 +20,7 @@ import {
 } from "./config-resolve";
 import { cacheDir, readCache, writeCache, extractVideoId, dataDir } from "./cache";
 import { extractChapters, formatChaptersAsText, formatChaptersAsJson } from "./extract-chapters";
-import { generateHtml, openInBrowser, formatMd, rebuildIndex } from "./html";
+import { generateHtml, openInBrowser, formatMd, rebuildIndex, renderAll } from "./html";
 import { fetchChannelDescription } from "./channel-description";
 import { checkVersion } from "./version-check";
 import pkg from "../package.json";
@@ -54,6 +54,7 @@ Usage: ${NAME} [options] <video-url-or-id>
        ${NAME} info [options] <video-url-or-id>
        ${NAME} summarize [options] <video-url-or-id>
        ${NAME} index
+       ${NAME} render
        ${NAME} config
        ${NAME} help
 
@@ -64,6 +65,7 @@ Commands:
   read                  Download and print a richly formatted transcript
   info                  Show video metadata (title, channel, duration, etc.)
   index                 Rebuild and open the document index in the browser
+  render                Regenerate all HTML pages from cached markdown
   config                Open config file in \$EDITOR
   help                  Show this help message
 
@@ -229,7 +231,13 @@ const config: ProseyConfig = await loadConfig().catch(() => ({}) as ProseyConfig
 
 let mode = "summarize";
 const subcmdIndex = args.findIndex(
-  (a) => a === "info" || a === "summarize" || a === "config" || a === "read" || a === "index",
+  (a) =>
+    a === "info" ||
+    a === "summarize" ||
+    a === "config" ||
+    a === "read" ||
+    a === "index" ||
+    a === "render",
 );
 if (subcmdIndex !== -1) {
   mode = args[subcmdIndex]!;
@@ -340,6 +348,8 @@ for (let i = 0; i < args.length; i++) {
   }
 }
 
+setLevel(logLevel);
+
 if (mode === "config") {
   const path = configPath();
   const editor = process.env.EDITOR;
@@ -361,6 +371,12 @@ if (mode === "index") {
   exitProcess(0);
 }
 
+if (mode === "render") {
+  const pages = await renderAll(dataDir(config.dataDir));
+  info(`Rendered ${pages} ${pages === 1 ? "page" : "pages"} from cached markdown`);
+  exitProcess(0);
+}
+
 if (!videoId) {
   console.error("Error: missing video URL or ID");
   console.log(help());
@@ -376,7 +392,6 @@ if (!extracted) {
 
 videoId = extracted!;
 
-setLevel(logLevel);
 resetTimer();
 pagerCmd = usePager ? detectPager(config.pager) : null;
 debug("Pager:", pagerCmd ?? "none");

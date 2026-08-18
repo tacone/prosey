@@ -41,6 +41,9 @@ untouched, so rebuilds are idempotent and content mtimes stay stable.
 - End of every markdown/html `transcribe` run (fresh or cache hit)
 - Explicitly via the `prosey index` command, which also opens the index in the
   browser
+- `prosey render` — regenerates every content HTML page from cached markdown
+  (ignoring the template marker, no network or AI processing) and rewrites the
+  index
 
 ## 5. Navigation
 

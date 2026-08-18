@@ -79,6 +79,7 @@ prosey read [options] <video-url-or-id>
 prosey info [options] <video-url-or-id>
 prosey summarize [options] <video-url-or-id>
 prosey index
+prosey render
 prosey config
 prosey help
 ```
@@ -98,6 +99,9 @@ The `index` command rebuilds the document index and opens it in the browser.
 The index lists every summary and transcription stored in the data directory
 and is automatically rebuilt after each summarize/transcribe run. Clicking the
 Prosey logo on any content page navigates back to it.
+
+The `render` command regenerates every HTML page from the cached markdown
+(no network or AI processing) and rewrites the index.
 
 The `config` command opens your config file in `$EDITOR` for editing. If
 `$EDITOR` is not set, the config file path is printed.
