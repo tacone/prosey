@@ -158,9 +158,14 @@ img[alt="Prosey"] { filter: grayscale(100%); }
 img[alt="Prosey"]:hover, img[alt="Prosey"]:active, img[alt="Prosey"]:focus { filter: grayscale(0%); }
 .watch-link { color: inherit; text-decoration: none; }
 .watch-link:hover { text-decoration: underline; }
+.doc-item { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--pico-muted-border-color); }
+.doc-item:first-child { margin-top: 8rem; }
+.doc-item:last-child { border-bottom: none; margin-bottom: 0; }
+.doc-title { color: inherit; text-decoration: none; }
+.doc-title:hover { text-decoration: underline; }
 .doc-meta { color: var(--pico-muted-color); font-size: 0.9rem; margin: 0; }
-.doc-badges { margin-top: 0.5rem; }
-.doc-badges a { margin-right: 0.5rem; }
+.doc-badges { margin: 0.5rem 0 0; }
+.doc-badges a { margin-right: 0.75rem; }
 </style>
 </head>`;
 }
@@ -247,14 +252,14 @@ export function generateIndexHtml(docs: CachedDocument[]): Promise<string> {
         const href = item.htmlPath
           ? `${entry}/${item.htmlPath.split(/[\\/]/).pop()}`
           : `${entry}/${item.mdPath.split(/[\\/]/).pop()}`;
-        return `<a href="${href}" role="button" class="outline">${label}</a>`;
+        return `<a href="${href}" class="doc-badge">[${label}]</a>`;
       };
       const badges = [badge("Summary", doc.summary), badge("Transcript", doc.transcript)].join("");
-      return `<article>
-<h3><a href="${primaryHref}">${title}</a></h3>
+      return `<div class="doc-item">
+<h3><a href="${primaryHref}" class="doc-title">${title}</a></h3>
 <p class="doc-meta">${meta}</p>
 <p class="doc-badges">${badges}</p>
-</article>`;
+</div>`;
     })
     .join("\n");
 
@@ -266,7 +271,6 @@ ${pageHead(css, "Index")}
 <body>
 ${pageHeader(`${docs.length} ${docs.length === 1 ? "document" : "documents"}`)}
 <main class="content">
-<h1>Index</h1>
 ${items}
 </main>
 <script>

@@ -58,9 +58,11 @@ describe("generateIndexHtml", () => {
     expect(html).toContain("Never Gonna Give You Up");
     expect(html).toContain("Rick Astley");
     expect(html).toContain('href="dQw4w9WgXcQ_62d1ff1b/summary.md"');
-    expect(html).toContain(">Summary</a>");
+    expect(html).toContain("[Summary]");
     expect(html).toContain("1 document");
     expect(html).not.toContain('<a href="../index.html"');
+    expect(html).not.toContain("<h1>Index</h1>");
+    expect(html).not.toContain("<article");
   });
 
   test("links to html pages and both badges when present", async () => {
@@ -78,7 +80,7 @@ describe("generateIndexHtml", () => {
     ]);
     expect(html).toContain('href="dQw4w9WgXcQ_62d1ff1b/summary.html"');
     expect(html).toContain('href="dQw4w9WgXcQ_62d1ff1b/transcript.html"');
-    expect(html).toContain(">Transcript</a>");
+    expect(html).toContain("[Transcript]");
     expect(html).toContain("3 min watch · 3 min read");
   });
 
@@ -109,7 +111,7 @@ describe("rebuildIndex", () => {
     expect(existsSync(join(base, key, "summary.html"))).toBe(true);
     const indexHtml = await readFile(indexPath!, "utf8");
     expect(indexHtml).toContain("Test Video");
-    expect(indexHtml).toContain(">Summary</a>");
+    expect(indexHtml).toContain("[Summary]");
   });
 
   test("regenerates stale html pages but keeps fresh ones", async () => {
