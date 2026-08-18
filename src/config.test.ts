@@ -108,7 +108,7 @@ describe("resetConfig", () => {
     expect(config.transcribe?.prompt).toBeString();
   });
 
-  test("overwrites existing file with commented defaults", async () => {
+  test("overwrites existing file with commented defaults, section headers active", async () => {
     process.env.PROSEY_CONFIG_PATH = tmpConfig;
 
     await Bun.write(tmpConfig, "# garbage");
@@ -116,7 +116,9 @@ describe("resetConfig", () => {
     expect(path).toBe(tmpConfig);
 
     const content = await readFile(tmpConfig, "utf8");
-    expect(content).toContain("# [summarize]");
+    expect(content).toContain("[summarize]");
+    expect(content).toContain("[transcribe]");
+    expect(content).not.toContain("# [summarize]");
     expect(content).toContain("# command = ");
   });
 });

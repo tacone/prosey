@@ -110,7 +110,9 @@ export async function resetConfig(): Promise<string> {
     .split("\n")
     .map((line) => {
       const trimmed = line.trim();
-      if (trimmed === "" || trimmed.startsWith("#")) return line;
+      if (trimmed === "" || trimmed.startsWith("#") || /^\[[a-z][a-z0-9_-]*\]$/.test(trimmed)) {
+        return line;
+      }
       return line.replace(trimmed, `# ${trimmed}`);
     })
     .join("\n");

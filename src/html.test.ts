@@ -81,7 +81,9 @@ describe("generateIndexHtml", () => {
     expect(html).toContain('href="dQw4w9WgXcQ_62d1ff1b/summary.html"');
     expect(html).toContain('href="dQw4w9WgXcQ_62d1ff1b/transcript.html"');
     expect(html).toContain("[Transcript]");
-    expect(html).toContain("3 min watch · 3 min read");
+    expect(html).toContain("3 min watch");
+    expect(html).toContain("3 min read");
+    expect(html).toContain("&nbsp;&nbsp;|&nbsp;&nbsp;");
   });
 
   test("sorts newest first", async () => {
