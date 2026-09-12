@@ -10,6 +10,7 @@ export interface ProseyConfig {
   hints?: boolean;
   format?: string;
   dataDir?: string;
+  clipboard?: string;
   ai?: {
     command?: string;
   };
@@ -54,6 +55,7 @@ export function mergeOverDefaults(user: ProseyConfig, defaults: ProseyConfig): P
     hints: user.hints ?? defaults.hints,
     format: user.format ?? defaults.format,
     dataDir: user.dataDir ?? defaults.dataDir,
+    clipboard: user.clipboard ?? defaults.clipboard,
     ai: user.ai?.command !== undefined ? user.ai : defaults.ai,
     summarize: {
       command: user.summarize?.command ?? defaults.summarize?.command,

@@ -23,6 +23,7 @@ Prosey can also output or store the native json format verbatim.
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------- |
 | **💡&nbsp;&nbsp;Summarize**                | Fetch and summarize a video transcription                                                       |
 | **📖&nbsp;&nbsp;Read**                     | Fetch and display the transcript formatted in Markdown                                          |
+| **💬&nbsp;&nbsp;Copy**                     | Copy a summary to the clipboard, ready to paste into a web chat                                 |
 | **📋&nbsp;&nbsp;Transcript&nbsp;download** | Fetch YouTube transcripts as plain text or JSON verbatim                                        |
 | **🤖&nbsp;&nbsp;AI&nbsp;summarization**    | Pipe transcripts to any AI agent (opencode, Claude, Copilot, Codex)                             |
 | **🎨&nbsp;&nbsp;Smart&nbsp;pager**         | Automatic syntax highlighting if bat, glow or mdcat are installed (or configure your own pager) |
@@ -78,6 +79,7 @@ prosey [options] <video-url-or-id>
 prosey read [options] <video-url-or-id>
 prosey info [options] <video-url-or-id>
 prosey summarize [options] <video-url-or-id>
+prosey copy [--question <text>] <folder>
 prosey index
 prosey render
 prosey config
@@ -102,6 +104,15 @@ Prosey logo on any content page navigates back to it.
 
 The `render` command regenerates every HTML page from the cached markdown
 (no network or AI processing) and rewrites the index.
+
+The `copy` command copies a document's summary to the clipboard, ready to be
+pasted into a web chat. It takes the folder name printed at the end of the last
+run (or a full path); `--question` appends your question after the summary,
+separated by two blank lines. Only summaries can be copied — a transcript-only
+folder is an error.
+
+Summary pages carry a **Copy** link on the meta line, right of the reading time:
+it puts the summary on the clipboard, ready to paste into a web chat.
 
 The `config` command opens your config file in `$EDITOR` for editing. If
 `$EDITOR` is not set, the config file path is printed.
@@ -155,6 +166,7 @@ prosey read 771PQEDeRmw -o transcript.txt
 | `--details`             | Prepend video details (title, channel, duration, views, description) to the transcript (default).              |
 | `--no-details`          | Suppress video details, transcript only.                                                                       |
 | `--no-decode-entities`  | Preserve raw HTML entities (e.g. `&#39;`). Decoded by default in text mode.                                    |
+| `--question <text>`     | Append a question to the summary when copying.                                                                 |
 | `--no-cache`            | Skip cache reads and force a fresh fetch.                                                                      |
 | `--no-format`           | Skip prettier markdown formatting on summarize output.                                                         |
 | `-q`, `--quiet`         | Suppress all stderr logging.                                                                                   |
@@ -213,6 +225,13 @@ Pager command for transcript and summary output. Defaults to `"auto"`, which
 detects the first available of: `bat -lmd --style plain` → `glow -p` → `mdcat -l -p` → `less`.
 Set to a custom command (e.g. `"less -R"`) to override. The `PROSEY_PAGER`
 environment variable takes precedence over this setting.
+
+### `clipboard`
+
+Clipboard command used by `prosey copy` and by the copy action on generated
+pages. Defaults to `"auto"`, which detects the first available of: `wl-copy` →
+`xclip -selection clipboard` → `xsel --clipboard --input` → `pbcopy` → `clip`.
+Set to a custom command to override; the text to copy arrives on stdin.
 
 ### `[summarize]`
 

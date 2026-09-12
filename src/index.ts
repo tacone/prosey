@@ -21,6 +21,14 @@ import {
 import { cacheDir, readCache, writeCache, extractVideoId, dataDir } from "./cache";
 import { extractChapters, formatChaptersAsText, formatChaptersAsJson } from "./extract-chapters";
 import { generateHtml, openInBrowser, formatMd, rebuildIndex, renderAll } from "./html";
+import {
+  buildAskPayload,
+  copyToClipboard,
+  detectClipboard,
+  documentName,
+  resolveDocument,
+  readSummary,
+} from "./ask";
 import { fetchChannelDescription } from "./channel-description";
 import { checkVersion } from "./version-check";
 import pkg from "../package.json";
@@ -53,6 +61,7 @@ Usage: ${NAME} [options] <video-url-or-id>
        ${NAME} read [options] <video-url-or-id>
        ${NAME} info [options] <video-url-or-id>
        ${NAME} summarize [options] <video-url-or-id>
+       ${NAME} copy [--question <text>] <folder>
        ${NAME} index
        ${NAME} render
        ${NAME} config
@@ -64,6 +73,7 @@ Commands:
   summarize             Pipe transcript to the AI command (default command)
   read                  Download and print a richly formatted transcript
   info                  Show video metadata (title, channel, duration, etc.)
+  copy                  Copy a summary to the clipboard
   index                 Rebuild and open the document index in the browser
   render                Regenerate all HTML pages from cached markdown
   config                Open config file in \$EDITOR
@@ -90,6 +100,7 @@ Options:
   --no-format            Skip prettier formatting.
   --dry-run              Print what would be sent to the AI command and exit.
   --extract-timestamps   Extract chapter timestamps from video description.
+  --question <text>      Append a question to the summary when copying.
   --no-pager             Disable pager for stdout output.
   --pager                Use pager for stdout output (default).
   --no-hints             Disable hints.
@@ -106,7 +117,9 @@ Examples:
   ${NAME} dQw4w9WgXcQ --list
   ${NAME} dQw4w9WgXcQ --json
   ${NAME} dQw4w9WgXcQ --no-details
-  ${NAME} info dQw4w9WgXcQ`;
+  ${NAME} info dQw4w9WgXcQ
+  ${NAME} copy dQw4w9WgXcQ_62d1ff1b
+  ${NAME} copy dQw4w9WgXcQ_62d1ff1b --question "which tools are mentioned?"`;
 }
 
 function formatDetailsBlock(details: VideoDetails): string {
@@ -237,7 +250,8 @@ const subcmdIndex = args.findIndex(
     a === "config" ||
     a === "read" ||
     a === "index" ||
-    a === "render",
+    a === "render" ||
+    a === "copy",
 );
 if (subcmdIndex !== -1) {
   mode = args[subcmdIndex]!;
@@ -246,6 +260,7 @@ if (subcmdIndex !== -1) {
 
 let videoId = "";
 let lang: string | undefined;
+let question: string | undefined;
 let timestamps = false;
 let listOnly = false;
 let outputPath: string | undefined;
@@ -340,6 +355,12 @@ for (let i = 0; i < args.length; i++) {
     dryRun = true;
   } else if (arg === "--extract-timestamps") {
     extractTimestamps = true;
+  } else if (arg === "--question") {
+    question = args[++i] ?? undefined;
+    if (!question) {
+      console.error("Error: --question requires a text argument");
+      exitProcess(1);
+    }
   } else if (arg.startsWith("-")) {
     console.error(`Unknown option: ${arg}`);
     exitProcess(1);
@@ -375,6 +396,29 @@ if (mode === "render") {
   const pages = await renderAll(dataDir(config.dataDir));
   info(`Rendered ${pages} ${pages === 1 ? "page" : "pages"} from cached markdown`);
   exitProcess(0);
+}
+
+if (mode === "copy") {
+  try {
+    if (!videoId) throw new Error("missing folder name");
+    const target = resolveDocument(videoId, dataDir(config.dataDir));
+    const summary = await readSummary(target.dir);
+    if (summary === null)
+      throw new Error(`no summary in ${target.name} (only summaries can be copied)`);
+    const clipboardCmd = detectClipboard(config.clipboard);
+    if (!clipboardCmd) {
+      throw new Error(
+        'no clipboard command found, set "clipboard" in your config (e.g. "wl-copy")',
+      );
+    }
+    const payload = buildAskPayload(summary, question);
+    await copyToClipboard(clipboardCmd, payload);
+    info(`Copied ${payload.length} characters to clipboard`);
+    exitProcess(0);
+  } catch (err: unknown) {
+    console.error(`Error: ${err instanceof Error ? err.message : String(err)}`);
+    exitProcess(1);
+  }
 }
 
 if (!videoId) {
@@ -615,14 +659,19 @@ try {
     const formatted = noFormat ? summary : await formatMd(summary);
     if (format === "html") {
       const wordCount = summary!.split(/\s+/).filter(Boolean).length;
-      const htmlContent = await generateHtml(formatted, videoTitle, {
-        videoId,
-        duration: videoDuration,
-        wordCount,
-        channelName,
-        channelId,
-        channelDescription,
-      });
+      const htmlContent = await generateHtml(
+        formatted,
+        videoTitle,
+        {
+          videoId,
+          duration: videoDuration,
+          wordCount,
+          channelName,
+          channelId,
+          channelDescription,
+        },
+        buildAskPayload(summary!),
+      );
       const htmlPath = join(dir, "summary.html");
       await writeFile(htmlPath, htmlContent, "utf8");
       debug("HTML written:", htmlPath);
@@ -637,6 +686,7 @@ try {
       await outputText(formatted + "\n");
     }
     await rebuildIndex(activeDataDir);
+    info(documentName(dir));
     exitProcess(0);
   } else if (listOnly) {
     const languages = await listLanguages(videoId);
@@ -831,6 +881,7 @@ try {
       await outputText(formatted + "\n");
     }
     await rebuildIndex(activeDataDir);
+    info(documentName(dir));
     exitProcess(0);
   }
 

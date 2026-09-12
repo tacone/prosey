@@ -5,6 +5,7 @@ TODO list (updated as work progresses).
 ## Backlog
 
 - [x] Document index: `prosey index`, index.html in data dir, auto-rebuild after summarize/transcribe, logo navigation
+- [x] Copy: `prosey copy <folder>` (clipboard) + Copy link on summary pages
 - [ ] Scaffold Bun project with `youtube-transcript-plus`
 - [ ] Implement core CLI: URL/ID → transcript → stdout
 - [ ] Add `-o <file>` output flag

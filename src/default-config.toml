@@ -11,6 +11,11 @@ format = "html"
 # Can also be set via the PROSEY_PAGER env var (takes precedence).
 pager = "auto"
 
+# Clipboard command used by "prosey copy" and the copy action in generated pages.
+# Defaults to "auto": wl-copy → xclip -selection clipboard → xsel --clipboard --input → pbcopy → clip
+# Set to a custom command to override; the text to copy arrives on stdin.
+clipboard = "auto"
+
 # Show hints when available
 # Can also be set via PROSEY_HINTS env var (yes, no, 1, 0, true, false).
 hints = true

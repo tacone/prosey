@@ -1,5 +1,30 @@
 # Changelog — Prosey
 
+## 2026-09-12 (1) — v0.13.0 — copy command and Copy link
+
+Workstation: xoxo | Workspace: prosey → see <summaries/001-copy.md>
+
+New `prosey copy <folder>` puts a document's summary on the clipboard, and summary
+pages carry a **Copy** link in the header offering the same copy. Document-producing
+runs now print the document folder name, so it can be pasted straight into `copy`.
+
+- `src/ask.ts` — payload builder (summary, optional question after two blank lines), clipboard detection/copy, document resolution
+- `prosey copy <folder> [--question <text>]`: clipboard only, no browser; errors on unknown documents and on transcripts without a summary
+- `clipboard` config key (default `"auto"`): wl-copy → xclip → xsel → pbcopy → clip, or a custom command receiving the text on stdin
+- Copy link on summary pages only (not transcript pages, not the index), on the meta line after the reading time and behind the same pipe separator; payload embedded as JSON so it works offline over `file://`
+- `summarize` / markdown-html runs print the document folder name (not the path) as the last stderr line
+- Page template marker bumped `content-v2` → `content-v3`; `prosey render` regenerated 40 pages
+- Flag is `--question`, not `-q`, which is already taken by `--quiet`
+
+Notes: an earlier cut of the header offered `ChatGPT` / `Claude` links that prefilled the
+composer with the summary. Prefill of a full summary is unreliable — the encoded links run
+3.2 KB – 60 KB (median 14 KB across the 39 summaries here) and worked inconsistently in
+Firefox/Zen — so the links and their menu were dropped: the clipboard is the only transport.
+
+Also fixed a test-isolation bug the new test file exposed: `channel-description.test.ts`
+replaced `globalThis.fetch` and never restored it, which broke every HTML test depending on
+where the runner grouped the files.
+
 ## 2026-08-18 (2) — v0.12.0 — render command
 
 Workstation: xoxo | Workspace: prosey

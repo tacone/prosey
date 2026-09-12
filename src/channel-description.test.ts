@@ -1,5 +1,11 @@
-import { describe, expect, test, mock } from "bun:test";
+import { describe, expect, test, mock, afterEach } from "bun:test";
 import { fetchChannelDescription } from "./channel-description";
+
+const originalFetch = globalThis.fetch;
+
+afterEach(() => {
+  globalThis.fetch = originalFetch;
+});
 
 function mockFetchResponse(data: unknown): void {
   globalThis.fetch = mock(() =>
