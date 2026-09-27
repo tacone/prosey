@@ -22,6 +22,10 @@ export interface ProseyConfig {
     prompt?: string;
     command?: string;
   };
+  youtube?: {
+    poToken?: string;
+    visitorData?: string;
+  };
 }
 
 async function readDefaultConfig(): Promise<string> {
@@ -64,6 +68,10 @@ export function mergeOverDefaults(user: ProseyConfig, defaults: ProseyConfig): P
     transcribe: {
       command: user.transcribe?.command ?? defaults.transcribe?.command,
       prompt: user.transcribe?.prompt ?? defaults.transcribe?.prompt,
+    },
+    youtube: {
+      poToken: user.youtube?.poToken ?? defaults.youtube?.poToken,
+      visitorData: user.youtube?.visitorData ?? defaults.youtube?.visitorData,
     },
   };
 }

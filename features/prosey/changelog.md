@@ -1,5 +1,19 @@
 # Changelog — Prosey
 
+## 2026-09-27 (1) — v0.13.1 — YouTube bot-protection tokens and clearer errors
+
+Workstation: xoxo | Workspace: prosey
+
+Transcribes can be blocked by YouTube with "Sign in to confirm you're not a bot",
+typically behind a VPN/proxy. The Innertube player request now goes through a
+`playerFetch` hook that can carry a po_token/visitor_data and that turns the
+generic "No transcripts are available" error into an actionable message.
+
+- New `[youtube]` config section: `po_token` and `visitor_data` (both empty by default), camelized from snake_case by `camelizeKeys`
+- All `fetchTranscript` / `listLanguages` call sites pass `buildFetchOptions`, which injects the tokens into the ANDROID-client player body via the library's `playerFetch` hook
+- `playerBlockMessage` detects `playabilityStatus: LOGIN_REQUIRED` and raises: "YouTube blocked the transcript request … Try without [VPN], or set po_token and visitor_data in the [youtube] section of your config"
+- New `src/youtube.ts` module (token injection, block detection, fetch options) with unit tests; 173 tests pass
+
 ## 2026-09-12 (1) — v0.13.0 — copy command and Copy link
 
 Workstation: xoxo | Workspace: prosey → see <summaries/001-copy.md>

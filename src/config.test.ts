@@ -62,7 +62,17 @@ describe("loadConfig", () => {
     expect(content).toContain("[ai]");
     expect(content).toContain("[summarize]");
     expect(content).toContain("[transcribe]");
+    expect(content).toContain("[youtube]");
     expect(content).toContain("command = ");
+  });
+
+  test("reads snake_case youtube tokens as camelCase", async () => {
+    process.env.PROSEY_CONFIG_PATH = tmpConfig;
+    await Bun.write(tmpConfig, '[youtube]\npo_token = "TOK"\nvisitor_data = "VD"\n');
+
+    const config = await loadConfig();
+    expect(config.youtube?.poToken).toBe("TOK");
+    expect(config.youtube?.visitorData).toBe("VD");
   });
 
   test("reads existing config file", async () => {
@@ -155,6 +165,15 @@ describe("mergeOverDefaults", () => {
     const result = mergeOverDefaults({ hints: false }, defaults);
     expect(result.hints).toBe(false);
     expect(result.pager).toBe("auto");
+  });
+
+  test("user youtube tokens override default", () => {
+    const result = mergeOverDefaults(
+      { youtube: { poToken: "my-token", visitorData: "my-visitor" } },
+      defaults,
+    );
+    expect(result.youtube?.poToken).toBe("my-token");
+    expect(result.youtube?.visitorData).toBe("my-visitor");
   });
 
   test("user format overrides default", () => {

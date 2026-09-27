@@ -25,6 +25,15 @@ hints = true
 # Can also be set via the PROSEY_DATA_PATH env var (takes precedence).
 data_dir = ""
 
+[youtube]
+
+# YouTube bot-protection tokens. Only needed if YouTube blocks requests
+# (e.g. behind a VPN/proxy: "Sign in to confirm you're not a bot").
+# po_token is the proof-of-origin token; visitor_data is its companion.
+# Leave empty unless you have a po_token provider set up.
+po_token = ""
+visitor_data = ""
+
 [ai]
 
 # Default command for AI operations (summarize, transcribe).

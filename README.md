@@ -242,6 +242,19 @@ The `[summarize]` section configures the `summarize` command:
 | `prompt`  | Instruction prepended to the transcript          |
 | `command` | Shell command that receives the prompt via stdin |
 
+### `[youtube]`
+
+Optional YouTube bot-protection tokens, needed only when YouTube blocks
+transcript requests (typically behind a VPN/proxy, with the error
+"Sign in to confirm you're not a bot").
+
+| Key            | Description                                    |
+| -------------- | ---------------------------------------------- |
+| `po_token`     | Proof-of-origin token from a po_token provider |
+| `visitor_data` | Companion visitor data for the po_token        |
+
+Leave both empty (the default) unless you have a po_token provider set up.
+
 ### `PROSEY_PAGER`
 
 Environment variable to set the pager command. Takes precedence over the

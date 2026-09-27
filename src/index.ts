@@ -8,6 +8,7 @@ import { join } from "node:path";
 import { detectPager } from "./pager";
 import { fetchTranscript, listLanguages } from "youtube-transcript-plus";
 import type { CaptionTrackInfo, VideoDetails, TranscriptSegment } from "youtube-transcript-plus";
+import { buildFetchOptions } from "./youtube";
 import { formatWithTimestamps, toText, toJSON, formatDuration, decodeEntities } from "./format";
 import { loadConfig, resetConfig, configPath } from "./config";
 import type { ProseyConfig } from "./config";
@@ -472,10 +473,10 @@ await Promise.race([versionCheck, new Promise((r) => setTimeout(r, 1000))]);
 if (extractTimestamps) {
   startTimer();
   info("Fetching transcript...");
-  const result = (await fetchTranscript(videoId, {
-    videoDetails: true,
-    lang,
-  } as any)) as {
+  const result = (await fetchTranscript(
+    videoId,
+    buildFetchOptions(config.youtube ?? {}, { lang, videoDetails: true }),
+  )) as any as {
     videoDetails: VideoDetails;
     segments: TranscriptSegment[];
   };
@@ -492,7 +493,10 @@ try {
   const activeDataDir = dataDir(config.dataDir);
 
   if (mode === "info") {
-    const result = await fetchTranscript(videoId, { videoDetails: true, lang } as any);
+    const result = (await fetchTranscript(
+      videoId,
+      buildFetchOptions(config.youtube ?? {}, { lang, videoDetails: true }),
+    )) as unknown as { videoDetails: VideoDetails };
     if (outputJson) {
       console.log(JSON.stringify(result.videoDetails, null, 2));
     } else {
@@ -551,8 +555,10 @@ try {
 
     if (!segments) {
       info("Fetching transcript...");
-      const opts = lang ? { lang, videoDetails: true as const } : { videoDetails: true as const };
-      const result = (await fetchTranscript(videoId, opts)) as {
+      const result = (await fetchTranscript(
+        videoId,
+        buildFetchOptions(config.youtube ?? {}, { lang, videoDetails: true }),
+      )) as any as {
         videoDetails: VideoDetails;
         segments: TranscriptSegment[];
       };
@@ -594,10 +600,10 @@ try {
       let chapterValue: string;
       if (!cachedInfo) {
         debug("Cache missing info.json, re-fetching video details");
-        const fallbackOpts = lang
-          ? { lang, videoDetails: true as const }
-          : { videoDetails: true as const };
-        const fallbackResult = (await fetchTranscript(videoId, fallbackOpts)) as {
+        const fallbackResult = (await fetchTranscript(
+          videoId,
+          buildFetchOptions(config.youtube ?? {}, { lang, videoDetails: true }),
+        )) as any as {
           videoDetails: VideoDetails;
           segments: TranscriptSegment[];
         };
@@ -689,7 +695,7 @@ try {
     info(documentName(dir));
     exitProcess(0);
   } else if (listOnly) {
-    const languages = await listLanguages(videoId);
+    const languages = await listLanguages(videoId, buildFetchOptions(config.youtube ?? {}));
     printLanguages(languages);
     exitProcess(0);
   }
@@ -743,8 +749,10 @@ try {
 
     if (!segments) {
       info("Fetching transcript...");
-      const opts = lang ? { lang, videoDetails: true as const } : { videoDetails: true as const };
-      const result = (await fetchTranscript(videoId, opts)) as {
+      const result = (await fetchTranscript(
+        videoId,
+        buildFetchOptions(config.youtube ?? {}, { lang, videoDetails: true }),
+      )) as any as {
         videoDetails: VideoDetails;
         segments: TranscriptSegment[];
       };
@@ -799,10 +807,10 @@ try {
       let chapterValue: string;
       if (!cachedInfo) {
         debug("Cache missing info.json, re-fetching video details");
-        const fallbackOpts = lang
-          ? { lang, videoDetails: true as const }
-          : { videoDetails: true as const };
-        const fallbackResult = (await fetchTranscript(videoId, fallbackOpts)) as {
+        const fallbackResult = (await fetchTranscript(
+          videoId,
+          buildFetchOptions(config.youtube ?? {}, { lang, videoDetails: true }),
+        )) as any as {
           videoDetails: VideoDetails;
           segments: TranscriptSegment[];
         };
@@ -917,15 +925,17 @@ try {
   if (!segments) {
     info("Fetching transcript...");
     if (showDetails && !outputJson) {
-      const opts = lang ? { lang, videoDetails: true as const } : { videoDetails: true as const };
-      const result = (await fetchTranscript(videoId, opts)) as {
+      const result = (await fetchTranscript(
+        videoId,
+        buildFetchOptions(config.youtube ?? {}, { lang, videoDetails: true }),
+      )) as any as {
         videoDetails: VideoDetails;
         segments: TranscriptSegment[];
       };
       segments = result.segments;
       videoDetailsCache = result.videoDetails;
     } else {
-      segments = lang ? await fetchTranscript(videoId, { lang }) : await fetchTranscript(videoId);
+      segments = await fetchTranscript(videoId, buildFetchOptions(config.youtube ?? {}, { lang }));
     }
     info(`Transcript: ${segments.length} segments`);
     await writeCache(dir, "transcript.json", JSON.stringify(segments));
@@ -933,8 +943,10 @@ try {
 
   if (showDetails && !outputJson) {
     if (!videoDetailsCache) {
-      const opts = lang ? { lang, videoDetails: true as const } : { videoDetails: true as const };
-      const result = (await fetchTranscript(videoId, opts)) as {
+      const result = (await fetchTranscript(
+        videoId,
+        buildFetchOptions(config.youtube ?? {}, { lang, videoDetails: true }),
+      )) as any as {
         videoDetails: VideoDetails;
         segments: TranscriptSegment[];
       };
