@@ -1,6 +1,6 @@
 # Changelog — Prosey
 
-## 2026-09-27 (1) — v0.13.1 — YouTube bot-protection tokens and clearer errors
+## 2026-09-27 (1) — v0.13.2 — YouTube bot-protection tokens and clearer errors
 
 Workstation: xoxo | Workspace: prosey
 
