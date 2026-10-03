@@ -244,9 +244,18 @@ The `[summarize]` section configures the `summarize` command:
 
 ### `[youtube]`
 
-Optional YouTube bot-protection tokens, needed only when YouTube blocks
-transcript requests (typically behind a VPN/proxy, with the error
-"Sign in to confirm you're not a bot").
+Preferred caption languages, tried in order until one is available:
+
+| Key         | Description                                                       |
+| ----------- | ----------------------------------------------------------------- |
+| `languages` | Ordered preference list (default `["en"]`). `en` matches `en-US`. |
+
+Set `languages = []` to accept the first available track regardless of
+language. The `--lang <code>` flag overrides this list for a single run.
+
+YouTube bot-protection tokens, needed only when YouTube blocks transcript
+requests (typically behind a VPN/proxy, with the error
+"Sign in to confirm you're not a bot"):
 
 | Key            | Description                                    |
 | -------------- | ---------------------------------------------- |

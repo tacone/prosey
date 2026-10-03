@@ -1,5 +1,19 @@
 # Changelog — Prosey
 
+## 2026-09-27 (2) — v0.14.0 — preferred caption languages
+
+Workstation: xoxo | Workspace: prosey
+
+Caption language selection now defaults to English and is configurable as an
+ordered preference list, instead of silently taking the first track YouTube
+returns.
+
+- New `[youtube] languages` config array (default `["en"]`); entries are tried in order, `en` matches regional variants like `en-US`
+- If no preferred language is available, falls back to the first available track; an empty list means "first available"
+- `--lang <code>` overrides the preference list for a single run
+- `fetchPreferred()` selects the language (reusing the library's `availableLangs` on a miss to avoid extra requests); `pickLanguage()` does exact-then-prefix matching
+- 180 tests pass
+
 ## 2026-09-27 (1) — v0.13.2 — YouTube bot-protection tokens and clearer errors
 
 Workstation: xoxo | Workspace: prosey

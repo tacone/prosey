@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { detectPager } from "./pager";
 import { fetchTranscript, listLanguages } from "youtube-transcript-plus";
 import type { CaptionTrackInfo, VideoDetails, TranscriptSegment } from "youtube-transcript-plus";
-import { buildFetchOptions } from "./youtube";
+import { buildFetchOptions, fetchPreferred } from "./youtube";
 import { formatWithTimestamps, toText, toJSON, formatDuration, decodeEntities } from "./format";
 import { loadConfig, resetConfig, configPath } from "./config";
 import type { ProseyConfig } from "./config";
@@ -84,7 +84,7 @@ Arguments:
   video-url-or-id        YouTube URL (full or short) or bare video ID
 
 Options:
-  --lang <code>          Language code (e.g. en, fr). Auto-detect if omitted.
+  --lang <code>          Language code (e.g. en, fr). Overrides the config preference list.
   -t, --timestamps       Include timestamps [MM:SS] in output.
   --list                 List available transcript languages and exit.
   -o, --output <path>    Write output to file instead of stdout.
@@ -467,16 +467,18 @@ debug("Video ID:", videoId);
 debug("Mode:", mode);
 if (lang) debug("Language:", lang);
 
+const preferredLangs = lang ? [lang] : (config.youtube?.languages ?? ["en"]);
+debug("Preferred languages:", preferredLangs.join(", ") || "first available");
+
 // Give the version check a moment to complete
 await Promise.race([versionCheck, new Promise((r) => setTimeout(r, 1000))]);
 
 if (extractTimestamps) {
   startTimer();
   info("Fetching transcript...");
-  const result = (await fetchTranscript(
-    videoId,
-    buildFetchOptions(config.youtube ?? {}, { lang, videoDetails: true }),
-  )) as any as {
+  const result = (await fetchPreferred(videoId, config.youtube ?? {}, preferredLangs, {
+    videoDetails: true,
+  })) as any as {
     videoDetails: VideoDetails;
     segments: TranscriptSegment[];
   };
@@ -493,10 +495,9 @@ try {
   const activeDataDir = dataDir(config.dataDir);
 
   if (mode === "info") {
-    const result = (await fetchTranscript(
-      videoId,
-      buildFetchOptions(config.youtube ?? {}, { lang, videoDetails: true }),
-    )) as unknown as { videoDetails: VideoDetails };
+    const result = (await fetchPreferred(videoId, config.youtube ?? {}, preferredLangs, {
+      videoDetails: true,
+    })) as unknown as { videoDetails: VideoDetails };
     if (outputJson) {
       console.log(JSON.stringify(result.videoDetails, null, 2));
     } else {
@@ -555,10 +556,9 @@ try {
 
     if (!segments) {
       info("Fetching transcript...");
-      const result = (await fetchTranscript(
-        videoId,
-        buildFetchOptions(config.youtube ?? {}, { lang, videoDetails: true }),
-      )) as any as {
+      const result = (await fetchPreferred(videoId, config.youtube ?? {}, preferredLangs, {
+        videoDetails: true,
+      })) as any as {
         videoDetails: VideoDetails;
         segments: TranscriptSegment[];
       };
@@ -600,9 +600,11 @@ try {
       let chapterValue: string;
       if (!cachedInfo) {
         debug("Cache missing info.json, re-fetching video details");
-        const fallbackResult = (await fetchTranscript(
+        const fallbackResult = (await fetchPreferred(
           videoId,
-          buildFetchOptions(config.youtube ?? {}, { lang, videoDetails: true }),
+          config.youtube ?? {},
+          preferredLangs,
+          { videoDetails: true },
         )) as any as {
           videoDetails: VideoDetails;
           segments: TranscriptSegment[];
@@ -749,10 +751,9 @@ try {
 
     if (!segments) {
       info("Fetching transcript...");
-      const result = (await fetchTranscript(
-        videoId,
-        buildFetchOptions(config.youtube ?? {}, { lang, videoDetails: true }),
-      )) as any as {
+      const result = (await fetchPreferred(videoId, config.youtube ?? {}, preferredLangs, {
+        videoDetails: true,
+      })) as any as {
         videoDetails: VideoDetails;
         segments: TranscriptSegment[];
       };
@@ -807,9 +808,11 @@ try {
       let chapterValue: string;
       if (!cachedInfo) {
         debug("Cache missing info.json, re-fetching video details");
-        const fallbackResult = (await fetchTranscript(
+        const fallbackResult = (await fetchPreferred(
           videoId,
-          buildFetchOptions(config.youtube ?? {}, { lang, videoDetails: true }),
+          config.youtube ?? {},
+          preferredLangs,
+          { videoDetails: true },
         )) as any as {
           videoDetails: VideoDetails;
           segments: TranscriptSegment[];
@@ -925,17 +928,20 @@ try {
   if (!segments) {
     info("Fetching transcript...");
     if (showDetails && !outputJson) {
-      const result = (await fetchTranscript(
-        videoId,
-        buildFetchOptions(config.youtube ?? {}, { lang, videoDetails: true }),
-      )) as any as {
+      const result = (await fetchPreferred(videoId, config.youtube ?? {}, preferredLangs, {
+        videoDetails: true,
+      })) as any as {
         videoDetails: VideoDetails;
         segments: TranscriptSegment[];
       };
       segments = result.segments;
       videoDetailsCache = result.videoDetails;
     } else {
-      segments = await fetchTranscript(videoId, buildFetchOptions(config.youtube ?? {}, { lang }));
+      segments = (await fetchPreferred(
+        videoId,
+        config.youtube ?? {},
+        preferredLangs,
+      )) as TranscriptSegment[];
     }
     info(`Transcript: ${segments.length} segments`);
     await writeCache(dir, "transcript.json", JSON.stringify(segments));
@@ -943,10 +949,9 @@ try {
 
   if (showDetails && !outputJson) {
     if (!videoDetailsCache) {
-      const result = (await fetchTranscript(
-        videoId,
-        buildFetchOptions(config.youtube ?? {}, { lang, videoDetails: true }),
-      )) as any as {
+      const result = (await fetchPreferred(videoId, config.youtube ?? {}, preferredLangs, {
+        videoDetails: true,
+      })) as any as {
         videoDetails: VideoDetails;
         segments: TranscriptSegment[];
       };

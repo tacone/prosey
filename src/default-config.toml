@@ -27,6 +27,10 @@ data_dir = ""
 
 [youtube]
 
+# Preferred caption languages, tried in order until one is available.
+# "en" also matches regional variants like "en-US". Empty list = first available.
+languages = ["en"]
+
 # YouTube bot-protection tokens. Only needed if YouTube blocks requests
 # (e.g. behind a VPN/proxy: "Sign in to confirm you're not a bot").
 # po_token is the proof-of-origin token; visitor_data is its companion.

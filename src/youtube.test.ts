@@ -1,5 +1,5 @@
 import { describe, expect, test, afterEach } from "bun:test";
-import { injectTokens, playerBlockMessage, buildPlayerFetch } from "./youtube";
+import { injectTokens, playerBlockMessage, buildPlayerFetch, pickLanguage } from "./youtube";
 import type { FetchParams } from "youtube-transcript-plus";
 
 const originalFetch = globalThis.fetch;
@@ -43,6 +43,28 @@ describe("playerBlockMessage", () => {
 
   test("returns null for an empty response", () => {
     expect(playerBlockMessage({})).toBeNull();
+  });
+});
+
+describe("pickLanguage", () => {
+  test("returns an exact match", () => {
+    expect(pickLanguage(["en"], ["it", "en"])).toBe("en");
+  });
+
+  test("matches a regional variant by prefix", () => {
+    expect(pickLanguage(["en"], ["en-US", "it"])).toBe("en-US");
+  });
+
+  test("respects preference order", () => {
+    expect(pickLanguage(["fr", "en"], ["en", "fr"])).toBe("fr");
+  });
+
+  test("prefers an exact match over a prefix match", () => {
+    expect(pickLanguage(["en"], ["en-US", "en"])).toBe("en");
+  });
+
+  test("returns undefined when none match", () => {
+    expect(pickLanguage(["en"], ["it", "de"])).toBeUndefined();
   });
 });
 

@@ -25,6 +25,7 @@ export interface ProseyConfig {
   youtube?: {
     poToken?: string;
     visitorData?: string;
+    languages?: string[];
   };
 }
 
@@ -72,6 +73,7 @@ export function mergeOverDefaults(user: ProseyConfig, defaults: ProseyConfig): P
     youtube: {
       poToken: user.youtube?.poToken ?? defaults.youtube?.poToken,
       visitorData: user.youtube?.visitorData ?? defaults.youtube?.visitorData,
+      languages: user.youtube?.languages ?? defaults.youtube?.languages,
     },
   };
 }

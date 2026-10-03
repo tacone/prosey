@@ -75,6 +75,14 @@ describe("loadConfig", () => {
     expect(config.youtube?.visitorData).toBe("VD");
   });
 
+  test("reads preferred languages array", async () => {
+    process.env.PROSEY_CONFIG_PATH = tmpConfig;
+    await Bun.write(tmpConfig, '[youtube]\nlanguages = ["en", "it"]\n');
+
+    const config = await loadConfig();
+    expect(config.youtube?.languages).toEqual(["en", "it"]);
+  });
+
   test("reads existing config file", async () => {
     process.env.PROSEY_CONFIG_PATH = tmpConfig;
 
@@ -174,6 +182,11 @@ describe("mergeOverDefaults", () => {
     );
     expect(result.youtube?.poToken).toBe("my-token");
     expect(result.youtube?.visitorData).toBe("my-visitor");
+  });
+
+  test("user preferred languages override default", () => {
+    const result = mergeOverDefaults({ youtube: { languages: ["it", "en"] } }, defaults);
+    expect(result.youtube?.languages).toEqual(["it", "en"]);
   });
 
   test("user format overrides default", () => {

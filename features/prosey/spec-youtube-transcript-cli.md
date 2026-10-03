@@ -20,14 +20,19 @@ positional argument.
 
 ## 4. Flags
 
-| Flag            | Description                                                   |
-| --------------- | ------------------------------------------------------------- |
-| `--lang <code>` | Language code (e.g. `en`, `fr`). Auto-detect if omitted.      |
-| `--timestamps`  | Include timestamps in output.                                 |
-| `--list`        | List available transcript languages for the video, then exit. |
-| `-o <path>`     | Write output to file instead of stdout.                       |
-| `--help`        | Show usage.                                                   |
-| `--version`     | Show version.                                                 |
+| Flag            | Description                                                                |
+| --------------- | -------------------------------------------------------------------------- |
+| `--lang <code>` | Language code (e.g. `en`, `fr`). Overrides the configured preference list. |
+| `--timestamps`  | Include timestamps in output.                                              |
+| `--list`        | List available transcript languages for the video, then exit.              |
+| `-o <path>`     | Write output to file instead of stdout.                                    |
+| `--help`        | Show usage.                                                                |
+| `--version`     | Show version.                                                              |
+
+Caption language selection: the `[youtube] languages` config list (default
+`["en"]`) is tried in order until a matching track is found; `en` also matches
+regional variants like `en-US`. If none match, the first available track is
+used. An empty list selects the first available track.
 
 ## 5. Tech Stack
 

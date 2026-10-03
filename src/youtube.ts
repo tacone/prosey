@@ -1,4 +1,13 @@
-import type { FetchParams, TranscriptConfig } from "youtube-transcript-plus";
+import {
+  fetchTranscript,
+  YoutubeTranscriptNotAvailableLanguageError,
+} from "youtube-transcript-plus";
+import type {
+  FetchParams,
+  TranscriptConfig,
+  TranscriptResult,
+  TranscriptSegment,
+} from "youtube-transcript-plus";
 
 const DEFAULT_USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
@@ -65,4 +74,32 @@ export function buildFetchOptions(
   extra: { lang?: string; videoDetails?: boolean } = {},
 ): TranscriptConfig {
   return { ...extra, playerFetch: buildPlayerFetch(youtube) };
+}
+
+export function pickLanguage(preferred: string[], available: string[]): string | undefined {
+  for (const pref of preferred) {
+    if (available.includes(pref)) return pref;
+    const prefix = available.find((a) => a.startsWith(`${pref}-`) || pref.startsWith(`${a}-`));
+    if (prefix) return prefix;
+  }
+  return undefined;
+}
+
+export async function fetchPreferred(
+  videoId: string,
+  youtube: YoutubeTokens,
+  preferred: string[],
+  extra: { videoDetails?: boolean } = {},
+): Promise<TranscriptResult | TranscriptSegment[]> {
+  const opts = buildFetchOptions(youtube, extra);
+  if (preferred.length === 0) return fetchTranscript(videoId, opts);
+
+  try {
+    return await fetchTranscript(videoId, { ...opts, lang: preferred[0] });
+  } catch (err) {
+    if (!(err instanceof YoutubeTranscriptNotAvailableLanguageError)) throw err;
+    const available = err.availableLangs ?? [];
+    const lang = pickLanguage(preferred, available) ?? available[0];
+    return lang ? fetchTranscript(videoId, { ...opts, lang }) : fetchTranscript(videoId, opts);
+  }
 }
