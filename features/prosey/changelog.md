@@ -1,5 +1,17 @@
 # Changelog — Prosey
 
+## 2026-10-16 (2) — v0.14.1 — unpin the model from the default command
+
+Workstation: moscow | Workspace: prosey → see
+<summaries/002-opencode-v2-default-command.md>
+
+The default AI command no longer selects a model, so it cannot rot the next time
+opencode renames or retires a model id.
+
+- `[ai] command` default is now plain `opencode run` (still wrapped in the `OPENCODE_PERMISSION` env var); opencode uses whichever model it is configured with
+- No pinned model, so no `#variant` suffix either — variant selection stays available per config as `provider/model#variant`
+- The default-command test now also asserts no `--model`
+
 ## 2026-10-16 (1) — v0.14.1 — opencode v2 flags and non-interactive `prosey config`
 
 Workstation: moscow | Workspace: prosey → see

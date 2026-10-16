@@ -2,8 +2,9 @@
 
 ## What was built
 
-- The bundled `[ai] command` now uses opencode v2 syntax:
-  `opencode run --model opencode/deepseek-v4.1-flash-free#low`.
+- The bundled `[ai] command` is now plain `opencode run` (no pinned model, and
+  none of the removed opencode v1 flags), so opencode uses whichever model it is
+  configured with; pinning an id rots as soon as opencode renames one.
 - `prosey config` prints the config file path (and exits 0) whenever there is no
   usable terminal, and only opens `$EDITOR` when attached to a TTY.
 - `loadConfig` warns on stderr about top-level config keys it ignores, naming the
@@ -27,10 +28,11 @@
 - `--pure` and `--variant` no longer exist in opencode v2 (installed: v2.0.29).
   Variants are now part of the model string (`provider/model#variant`), and tool
   access is already denied by the `OPENCODE_PERMISSION` env var in the same
-  command. `#low` was verified against the installed CLI before being written in.
+  command. The default avoids variant syntax entirely by not pinning a model.
 - Model ids rot: the old default pinned `opencode/deepseek-v4-flash-free`, which
-  `opencode models` no longer lists. The new default pins
-  `opencode/deepseek-v4.1-flash-free`.
+  `opencode models` no longer lists. Rather than pin another free model (an
+  earlier attempt used `opencode/deepseek-v4.1-flash-free#low`), the default now
+  pins nothing and defers to the user's opencode configuration.
 - `readDefaultConfig()` resolves `src/default-config.toml` relative to
   `import.meta.url`, so an installed prosey reads that file at runtime — editing
   it does not require a rebuild, but `bin/prosey` (the bundle) does.
@@ -42,6 +44,6 @@
 - End-to-end, user config (`[ai]` active): real run summarized 507 segments.
 - End-to-end, config _without_ `[ai]` (bundled default path): real run summarized
   507 segments, using the repaired default command.
-- Probe before writing the default: `opencode run --model
-opencode/deepseek-v4.1-flash-free#low` with the `OPENCODE_PERMISSION` env and
-  the prompt on stdin → exit 0.
+- Probe before writing the default: `opencode run` with the `OPENCODE_PERMISSION`
+  env and the prompt on stdin, no `--model` → exit 0 (opencode used its own
+  configured default model).

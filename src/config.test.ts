@@ -109,12 +109,13 @@ describe("loadConfig", () => {
     expect(config.ai?.command).toBeString();
   });
 
-  test("default ai command uses opencode v2 flags", async () => {
+  test("default ai command pins no model and no removed v1 flags", async () => {
     process.env.PROSEY_CONFIG_PATH = tmpConfig;
 
     const config = await loadConfig();
     const command = config.ai?.command ?? "";
 
+    expect(command).not.toContain("--model");
     expect(command).not.toContain("--pure");
     expect(command).not.toContain("--variant");
   });
