@@ -45,10 +45,14 @@ visitor_data = ""
 
 # Examples:
 #
-#   OPENCODE_PERMISSION='{"read":"allow","write":"deny","edit":"deny","bash":"deny","glob":"deny","grep":"deny","webfetch":\"deny\",\"task\":\"deny\",\"todowrite\":\"deny\",\"websearch\":\"deny","lsp":"deny"}' opencode run --pure
+#   OPENCODE_PERMISSION='{"read":"allow","write":"deny","edit":"deny","bash":"deny","glob":"deny","grep":"deny","webfetch":\"deny\",\"task\":\"deny\",\"todowrite\":\"deny\",\"websearch\":\"deny","lsp":"deny"}' opencode run --model opencode/deepseek-v4.1-flash-free#low
 #   copilot -s --deny-all-tools --read-only
+#
+# Model variants are part of the model string on opencode v2 (provider/model#variant);
+# the v1 --pure and --variant flags no longer exist. Tool access is denied by the
+# OPENCODE_PERMISSION environment variable above.
 
-command = "OPENCODE_PERMISSION='{\"read\":\"allow\",\"write\":\"deny\",\"edit\":\"deny\",\"bash\":\"deny\",\"glob\":\"deny\",\"grep\":\"deny\",\"webfetch\":\"deny\",\"task\":\"deny\",\"todowrite\":\"deny\",\"websearch\":\"deny\",\"lsp\":\"deny\"}' opencode run --pure  --model opencode/deepseek-v4-flash-free --variant low"
+command = "OPENCODE_PERMISSION='{\"read\":\"allow\",\"write\":\"deny\",\"edit\":\"deny\",\"bash\":\"deny\",\"glob\":\"deny\",\"grep\":\"deny\",\"webfetch\":\"deny\",\"task\":\"deny\",\"todowrite\":\"deny\",\"websearch\":\"deny\",\"lsp\":\"deny\"}' opencode run --model opencode/deepseek-v4.1-flash-free#low"
 
 [summarize]
 

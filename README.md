@@ -114,8 +114,9 @@ folder is an error.
 Summary pages carry a **Copy** link on the meta line, right of the reading time:
 it puts the summary on the clipboard, ready to paste into a web chat.
 
-The `config` command opens your config file in `$EDITOR` for editing. If
-`$EDITOR` is not set, the config file path is printed.
+The `config` command opens your config file in `$EDITOR` for editing. When there
+is no terminal to attach to — `$EDITOR` is not set, or stdout/stdin is piped —
+the config file path is printed instead.
 
 The `help` command shows the help message, same as `--help`.
 

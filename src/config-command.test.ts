@@ -20,7 +20,17 @@ describe("config subcommand", () => {
     const { stdout, exitCode } = await $`bin/prosey config`.quiet();
 
     expect(exitCode).toBe(0);
-    expect(stdout.toString().trim()).toBe(`Config file: ${testConfigPath}`);
+    expect(stdout.toString().trim()).toBe(testConfigPath);
+  });
+
+  test("prints config path without spawning the editor when not attached to a TTY", async () => {
+    process.env.EDITOR = "cat";
+    process.env.PROSEY_CONFIG_PATH = testConfigPath;
+
+    const { stdout, exitCode } = await $`bin/prosey config`.quiet();
+
+    expect(exitCode).toBe(0);
+    expect(stdout.toString().trim()).toBe(testConfigPath);
   });
 
   test("creates config file when missing", async () => {
@@ -34,14 +44,6 @@ describe("config subcommand", () => {
 
   test("does not require a video ID", async () => {
     delete process.env.EDITOR;
-    process.env.PROSEY_CONFIG_PATH = testConfigPath;
-
-    const { exitCode } = await $`bin/prosey config`.quiet();
-    expect(exitCode).toBe(0);
-  });
-
-  test("exits with code 0 after spawning editor", async () => {
-    process.env.EDITOR = "cat";
     process.env.PROSEY_CONFIG_PATH = testConfigPath;
 
     const { exitCode } = await $`bin/prosey config`.quiet();

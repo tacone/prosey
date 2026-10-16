@@ -98,6 +98,50 @@ async function parseOrEmpty(text: string): Promise<ProseyConfig> {
   }
 }
 
+const KNOWN_TOP_LEVEL_KEYS = new Set([
+  "pager",
+  "hints",
+  "format",
+  "dataDir",
+  "clipboard",
+  "ai",
+  "summarize",
+  "transcribe",
+  "youtube",
+]);
+
+const SECTION_KEYS: Record<string, string[]> = {
+  ai: ["command"],
+  summarize: ["prompt", "command"],
+  transcribe: ["prompt", "command"],
+  youtube: ["poToken", "visitorData", "languages"],
+};
+
+/**
+ * Config keys prosey will never read. The usual cause is a value whose section
+ * header is commented out: it silently lands at the top level instead (e.g. a
+ * stray `command` that belongs in [ai]).
+ */
+export function unusedConfigKeyWarnings(config: ProseyConfig): string[] {
+  const warnings: string[] = [];
+
+  for (const key of Object.keys(config as Record<string, unknown>)) {
+    if (KNOWN_TOP_LEVEL_KEYS.has(key)) continue;
+
+    const sections = Object.entries(SECTION_KEYS)
+      .filter(([, keys]) => keys.includes(key))
+      .map(([section]) => `[${section}]`);
+    const where =
+      sections.length > 0
+        ? ` It belongs in ${sections.join(", ")} — check that the section header isn't commented out.`
+        : "";
+
+    warnings.push(`Warning: unused config key "${key}" (ignored).${where}`);
+  }
+
+  return warnings;
+}
+
 export async function loadConfig(): Promise<ProseyConfig> {
   const defaultConfig = await parseOrEmpty(await readDefaultConfig());
   const path = configPath();
@@ -110,6 +154,9 @@ export async function loadConfig(): Promise<ProseyConfig> {
   }
 
   const userConfig = await parseOrEmpty(await readFile(path, "utf8"));
+  for (const warning of unusedConfigKeyWarnings(userConfig)) {
+    console.error(warning);
+  }
   return mergeOverDefaults(userConfig, defaultConfig);
 }
 

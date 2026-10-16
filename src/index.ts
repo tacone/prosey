@@ -77,7 +77,7 @@ Commands:
   copy                  Copy a summary to the clipboard
   index                 Rebuild and open the document index in the browser
   render                Regenerate all HTML pages from cached markdown
-  config                Open config file in \$EDITOR
+  config                Open config file in \$EDITOR (prints its path when not interactive)
   help                  Show this help message
 
 Arguments:
@@ -375,14 +375,14 @@ setLevel(logLevel);
 if (mode === "config") {
   const path = configPath();
   const editor = process.env.EDITOR;
-  if (editor) {
+  if (editor && process.stdin.isTTY && process.stdout.isTTY) {
     await new Promise<void>((resolve) => {
       const proc = spawn(editor, [path], { stdio: "inherit" });
       proc.on("exit", () => resolve());
       proc.on("error", () => resolve());
     });
   } else {
-    console.log(`Config file: ${path}`);
+    console.log(path);
   }
   exitProcess(0);
 }

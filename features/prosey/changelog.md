@@ -1,5 +1,28 @@
 # Changelog — Prosey
 
+## 2026-10-16 (1) — v0.14.1 — opencode v2 flags and non-interactive `prosey config`
+
+Workstation: moscow | Workspace: prosey → see
+<summaries/002-opencode-v2-default-command.md>
+
+`prosey` failed on every summarize when relying on the bundled default command,
+because opencode v2 no longer accepts the `--pure` and `--variant` flags that
+default passed. The `prosey config` command also always spawned `$EDITOR` when
+one was set, which hangs in scripts and CI.
+
+- `[ai] command` default (and its example comment) now use opencode v2 syntax: `opencode run --model opencode/deepseek-v4.1-flash-free#low`; `--pure` is dropped (tool access is already denied by the `OPENCODE_PERMISSION` env var) and the variant moved into the model string
+- Pinned model refreshed: `opencode/deepseek-v4-flash-free` is no longer listed by `opencode models`; the default now pins `opencode/deepseek-v4.1-flash-free`
+- `prosey config` prints the config file path and exits 0 when there is no usable terminal (no `$EDITOR`, or stdin/stdout piped), and only opens the editor when attached to a TTY
+- `loadConfig` now warns on stderr about top-level keys it ignores, naming the sections that define them, so a value whose section header was commented out no longer silently does nothing
+- README and the `config` help line updated to match
+- New regression tests: the bundled default command contains neither `--pure` nor `--variant`, and a stray top-level `command` warns while falling back to the default; rewrote the `prosey config` non-TTY test
+- 185 tests pass; typecheck clean
+
+Note: the underlying trap was that only `[ai].command` is read. A config file whose
+`[ai]` header is commented out while `command = "…"` is live parses `command` as a
+top-level key, which prosey silently ignored before falling back to the bundled
+default. The new warning surfaces exactly that.
+
 ## 2026-09-27 (2) — v0.14.0 — preferred caption languages
 
 Workstation: xoxo | Workspace: prosey

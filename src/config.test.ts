@@ -3,7 +3,13 @@ import { rm, readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
-import { configPath, loadConfig, resetConfig, mergeOverDefaults } from "./config";
+import {
+  configPath,
+  loadConfig,
+  resetConfig,
+  mergeOverDefaults,
+  unusedConfigKeyWarnings,
+} from "./config";
 import type { ProseyConfig } from "./config";
 
 const ORIGINAL_XDG = process.env.XDG_CONFIG_HOME;
@@ -101,6 +107,75 @@ describe("loadConfig", () => {
     expect(config.hints).toBe(true);
     expect(config.format).toBe("html");
     expect(config.ai?.command).toBeString();
+  });
+
+  test("default ai command uses opencode v2 flags", async () => {
+    process.env.PROSEY_CONFIG_PATH = tmpConfig;
+
+    const config = await loadConfig();
+    const command = config.ai?.command ?? "";
+
+    expect(command).not.toContain("--pure");
+    expect(command).not.toContain("--variant");
+  });
+
+  test("warns about a stray top-level command instead of ignoring it silently", async () => {
+    process.env.PROSEY_CONFIG_PATH = tmpConfig;
+    await Bun.write(tmpConfig, 'command = "my-cmd"\n');
+
+    const errors: string[] = [];
+    const originalError = console.error;
+    console.error = (...args: unknown[]) => {
+      errors.push(args.join(" "));
+    };
+
+    let config: ProseyConfig;
+    try {
+      config = await loadConfig();
+    } finally {
+      console.error = originalError;
+    }
+
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toContain('"command"');
+    expect(errors[0]).toContain("[ai]");
+    expect(config.ai?.command).not.toBe("my-cmd");
+  });
+});
+
+describe("unusedConfigKeyWarnings", () => {
+  test("stays silent for every recognized key", () => {
+    const config: ProseyConfig = {
+      pager: "auto",
+      hints: true,
+      format: "html",
+      dataDir: "",
+      clipboard: "auto",
+      ai: { command: "opencode run" },
+      summarize: { prompt: "p" },
+      transcribe: { prompt: "p" },
+      youtube: { languages: ["en"] },
+    };
+
+    expect(unusedConfigKeyWarnings(config)).toEqual([]);
+  });
+
+  test("points at the sections that define the stray key", () => {
+    const warnings = unusedConfigKeyWarnings({ command: "my-cmd" } as ProseyConfig);
+
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toContain('"command"');
+    expect(warnings[0]).toContain("[ai]");
+    expect(warnings[0]).toContain("[summarize]");
+    expect(warnings[0]).toContain("[transcribe]");
+  });
+
+  test("warns without a section suggestion for an unknown key", () => {
+    const warnings = unusedConfigKeyWarnings({ nonsense: 1 } as ProseyConfig);
+
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toContain('"nonsense"');
+    expect(warnings[0]).not.toContain("belongs in");
   });
 });
 
